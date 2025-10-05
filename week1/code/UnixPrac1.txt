@@ -1,0 +1,27 @@
+# Fasta challenge
+
+#1 Count the number of lines in each FASTA file
+wc -l ../data/fasta/*.fasta
+
+#2 Print all sequences starting from second line for E.coli.fasta 
+tail -n +2 ../data/fasta/E.coli.fasta
+
+#3 Print length
+awk '!/^>/{genome=genome $0} END{print length(genome)}' ../data/fasta/E.coli.fasta
+
+#4 Print matches of "ATGC"
+awk '!/^>/{gsub(/\n/,""); genome=genome $0} END{print gsub(/ATGC/,&,genome)}' ../data/fasta/E.coli.fasta
+
+#5 Print AT/GC ratio
+tail -n +2 ../data/fasta/E.coli.fasta | tr -d '\n' | awk '{a=gsub(/A/,""); t=gsub(/T/,""); g=gsub(/G/,""); c=gsub(/C/,""); print (a+t)/(g+c)}'
+
+
+# Final one-line command
+
+
+(wc -l ../data/fasta/*.fasta | awk '{print "file name:",$2,"number of lines :",$1}' ) && echo "===============" && tail -n +2 ../data/fasta/E.coli.fasta | tee /dev/tty E_coli_start_from_2nd_line.log |tr -d '\n' |\
+awk '{
+        print "length of E.coli.fasta file is :"length($0); 
+        print "numbers of ATGC are :"gsub(/ATGC/, "&");a=gsub(/A/,""); 
+        t=gsub(/T/,""); g=gsub(/G/,""); c=gsub(/C/,""); print "AT/GC ratio is :"(a+t)/(g+c)
+    }' 

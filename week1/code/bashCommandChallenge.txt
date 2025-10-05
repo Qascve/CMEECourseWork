@@ -1,0 +1,25 @@
+#!/bin/sh
+# Author: zy3425@imperial.ac.uk
+# Script: boilerplate.sh
+# Desc: bash command challenge
+
+# Task 1:
+# Modify the command so that it prints file sizes in human-readable format (kb, mb, etc.)
+echo "\n Task 1: \n"
+find . -type f -exec ls -sh {} \; | sort -n | head -10
+# ls-s shows file size in blocks, -h makes it human-readable
+# sort -n show first column by default ,which is the file size
+
+# Task 2:
+# imporeve the preformance of the command by using a different approach
+echo "\n Task 2: \n"
+find . -type f -exec ls -sh {} +; | sort -h | head -10
+# Using {} + instead of {} \; makes find pass multiple files at once to ls, 
+#    reducing the number of times ls is called and improving performance.
+
+# Task 3:
+# Avoid too many calls of ls by using xargs
+echo "\n Task 3: \n"
+find . -type f | xargs ls -sh | sort -h | head -10
+# xargs collects the output of find and passes it to ls in larger batches,
+#    further reducing the number of ls calls and improving efficiency.  
