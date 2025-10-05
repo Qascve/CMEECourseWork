@@ -13,7 +13,6 @@ Dir contains things of  Week 1 CMEECourseWork.
 
 - **result/**: Nothings right now,just a gitkeep
 
-- **sandbox/**: play ground ,not tracked on git
 
 
 ## Purpose
