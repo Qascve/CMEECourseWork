@@ -7,6 +7,12 @@
 # Arguments: 1 -> tab delimited file
 # Date: Sep 2025
 
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
 echo "Creating a comma delimited version of $1 ..."
 cat $1 | tr -s "\t" "," >> $1.csv
 echo -e "test \t\t test" >> ../sandbox/test.txt # relative path

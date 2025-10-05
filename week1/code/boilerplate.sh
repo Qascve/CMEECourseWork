@@ -6,5 +6,4 @@
 # Date: Sep 2025
 
 echo -e "\nThis is a shell script! \n"
-
-#exit
+exit # successful completion
