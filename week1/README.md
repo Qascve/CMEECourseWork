@@ -1,4 +1,4 @@
-# Week 1 Code
+# Week 1
 
 Dir contains things of  Week 1 CMEECourseWork.
 
