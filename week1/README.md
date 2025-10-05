@@ -11,7 +11,7 @@ Dir contains things of  Week 1 CMEECourseWork.
 
 - **data/**: Some data files from Week 1 include some fasta files
 
-- **result/**: Nothings right now,just a gitkeep
+- **result/**: Nothing right now,just a gitkeep
 
 
 
