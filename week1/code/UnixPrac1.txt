@@ -19,9 +19,10 @@ tail -n +2 ../data/fasta/E.coli.fasta | tr -d '\n' | awk '{a=gsub(/A/,""); t=gsu
 # Final one-line command
 
 
-(wc -l ../data/fasta/*.fasta | awk '{print "file name:",$2,"number of lines :",$1}' ) && echo "===============" && tail -n +2 ../data/fasta/E.coli.fasta | tee /dev/tty E_coli_start_from_2nd_line.log |tr -d '\n' |\
+(wc -l ../data/fasta/*.fasta | awk '{print "file name:",$2,"number of lines :",$1}' ) && \
+ echo "===============" && tail -n +2 ../data/fasta/E.coli.fasta | tee /dev/tty E_coli_start_from_2nd_line.log |tr -d '\n' |\
 awk '{
         print "length of E.coli.fasta file is :"length($0); 
-        print "numbers of ATGC are :"gsub(/ATGC/, "&");a=gsub(/A/,""); 
-        t=gsub(/T/,""); g=gsub(/G/,""); c=gsub(/C/,""); print "AT/GC ratio is :"(a+t)/(g+c)
+        print "numbers of ATGC are :"gsub(/ATGC/, "&");
+        a=gsub(/A/,""); t=gsub(/T/,""); g=gsub(/G/,""); c=gsub(/C/,""); print "AT/GC ratio is :"(a+t)/(g+c)
     }' 
