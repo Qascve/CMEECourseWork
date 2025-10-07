@@ -6,6 +6,12 @@ if [ $# -eq 0 ]; then # Check if any arguments are provided
     exit 1
 fi
 
+if [[ $file != *.tex ]]; then
+    echo "Error: Input file is not a .tex file"
+    exit 1
+fi
+
+
 if [[ $1 == *.tex ]]; then
     filename=${1%.tex} # Remove file extension
 else

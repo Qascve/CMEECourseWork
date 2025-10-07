@@ -1,4 +1,4 @@
 *~ 
 *.tmp
 week*/sandbox/
-week*/results/*
+!week*/results/.gitkeep
