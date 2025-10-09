@@ -4,11 +4,11 @@ Dir contains things of  Week 1 CMEECourseWork.
 
 ## Structure
 
-- **code:**: All scripts will be at here
+- **code:** All scripts will be at here
 
-- **data:**: Some data files from Week 1 include fasta files
+- **data:** Some data files from Week 1 include fasta files
 
-- **result:**: Place for keeping results of scripts,but only gitkeep will be tracked.
+- **result:** Place for keeping results of scripts,but only gitkeep will be tracked.
 
 
 
