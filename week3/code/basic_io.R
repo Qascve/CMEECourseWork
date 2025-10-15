@@ -11,4 +11,3 @@ write.csv(MyData, "week3/results/MyData.csv", row.names=TRUE) # write row names
 
 write.table(MyData, "week3/results/MyData.csv", col.names=FALSE) # ignore column names
 
-source("basic_io.R")
