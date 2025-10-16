@@ -50,14 +50,16 @@ def calculate_score(s1, s2, l1, l2, startpoint):
 
 # now try to find the best match (highest score) for the two sequences
 
-my_best_align = None
+my_best_align = []
 my_best_score = 0
 
 for i in range(l1): # Note that you just take the last alignment with the highest score
     z = calculate_score(s1, s2, l1, l2, i)
     if z > my_best_score:
-        my_best_align = "." * i + s2 # think about what this is doing!
-        my_best_score = z 
+        my_best_align = [("." * i + s2)] # store the best alignment
+        my_best_score = z
+    elif z == my_best_score:
+        my_best_align.append(("." * i + s2)) # if same score, append this alignment
 print(my_best_align)
 print(s1)
 print("Best score:", my_best_score)
