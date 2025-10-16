@@ -1,7 +1,0 @@
-{
-  "r.rterm.linux": "/usr/bin/R",
-  "r.lsp.path": "/usr/bin/R",
-  "r.lsp.debug": true,
-  "r.bracketedPaste": true
-
-}
