@@ -11,9 +11,9 @@ Dir contains things of  Week 2 CMEECourseWork.(python week)
 - **result:** Place for keeping results of scripts,but only gitkeep will be tracked.
 
 
-## Scripts Description
+## Scripts in week2
 
-### Basic Python Scripts
+##### Basic Python Scripts
 * `boilerplate.py`: 
   - Basic template for Python scripts with standardized structure. Demonstrates proper script organization with main function and command line arguments
 
@@ -23,7 +23,7 @@ Dir contains things of  Week 2 CMEECourseWork.(python week)
 * `MyExampleScript.py`:
   - Introductory script showing basic Python syntax. Contains examples of variable declarations and simple functions
 
-### Control Flow Scripts
+##### Control Flow Scripts
 * `control_flow.py`:
   - Comprehensive examples of Python control structures. Includes if-else statements, for loops, and while loops with practical examples
 
@@ -39,7 +39,7 @@ Dir contains things of  Week 2 CMEECourseWork.(python week)
 * `loops.py`:
   - Different types of loop implementations. Shows while, for, and nested loop examples
 
-### Data Structure Scripts
+##### Data Structure Scripts
 * `dictionary.py`:
   - Complete guide to Python dictionary operations. Includes creation, modification, deletion, and iteration examples
 
@@ -52,7 +52,7 @@ Dir contains things of  Week 2 CMEECourseWork.(python week)
 * `lc2.py`:
   - Advanced list comprehension examples. Includes nested comprehensions and conditional filtering
 
-### File Operations
+##### File Operations
 * `basic_io1.py`:
   - Basic file reading operations. Shows different methods to read text files.
 
@@ -65,9 +65,9 @@ Dir contains things of  Week 2 CMEECourseWork.(python week)
 * `basic_csv.py`:
   - CSV file manipulation examples. Shows reading, writing, and processing CSV data.
 
-### Practical
+## Practical
 * `align_seqs.py`:
-  - DNA sequence alignment algorithm implementation Finds best alignment between two DNA sequences.
+  - DNA sequence alignment algorithm implementation. Finds best alignment between two DNA sequences.
 
 * `align_seqs_fasta.py`:
   - Enhanced DNA sequence alignment for FASTA files. Includes FASTA format parsing and handling.
