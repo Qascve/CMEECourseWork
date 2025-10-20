@@ -1,0 +1,395 @@
+======================================================================
+AUTOMATED FEEDBACK LOG
+======================================================================
+
+HOW TO READ THIS FEEDBACK:
+--------------------------
+1. This log contains detailed feedback on your code execution
+2. Each script is tested and results are shown with output and errors
+3. IMPORTANT: Read all the way to the END for a summary and debugging guidance
+4. The summary at the end will help you understand and fix any issues
+5. Scripts are run in a headless environment (no GUI applications)
+
+======================================================================
+
+Starting testing for Zhou Yang
+
+Processing week 1
+
+Your current Git repo size is about 2.95 MiB on disk
+
+Found directories: .git, week1, week2, Feedback, week3
+Found files: .gitignore, README.md
+
+Processing week 1: week1
+
+Found 9 code files to test.
+
+Note: Expected file checking not performed (no FileList provided).
+Expected file checking will only be performed during final assessment.
+
+======================================================================
+Script: csvtospace.sh
+
+Contents:
+
+**********
+#!/bin/bash
+# Author:zy3425@ic.ac.uk
+# Script: csvtospace.sh
+# Description:
+# Converts a CSV file to a space-separated file
+
+
+echo "Please enter  file names: "
+
+read file
+
+if [[ $file != *.csv ]]; then
+    echo "Error: Input file is not a .csv file"
+    exit 1
+fi
+
+# Define outputpath
+outputPath="../results/$(basename "$file" .csv)_space_separated_version.txt"
+echo "Creating space-separated version of $file as $outputPath ..."
+
+# Convert commas to spaces
+tr ',' ' ' <"$file" >"$outputPath"
+echo "Done,Output saved to path:$outputPath"
+
+**********
+
+Output (first 500 chars):
+
+**********
+Please enter  file names: 
+Error: Input file is not a .csv file
+
+**********
+No errors.
+======================================================================
+Script: concatenateTwoFiles.sh
+
+Contents:
+
+**********
+#!/bin/bash
+
+echo "Usage: bash concatenateTwoFiles.sh File1 File2 Outputfile"
+
+echo -n "Please enter three file names (file1 file2 outputfile): "
+
+read file1 file2 outputfile
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+if [ ! -f "$file1" ] || [ ! -f "$file2" ]; then
+    echo "Error: Input file does not exist"
+    exit 1
+fi
+echo "Merging $file1 and $file2 into $outputfile ..."
+
+cat $file1 > $outputfile
+cat $file2 >> $outputfile
+echo "Merged File is"
+cat $outputfile
+**********
+
+Output (first 500 chars):
+
+**********
+Usage: bash concatenateTwoFiles.sh File1 File2 Outputfile
+Please enter three file names (file1 file2 outputfile): Error: No input provided
+
+**********
+No errors.
+======================================================================
+Script: myExampleScript.sh
+
+Contents:
+
+**********
+#!/bin/sh
+
+MSG1="Hello"
+MSG2=$USER
+echo "$MSG1 $MSG2"
+echo "Hello $USER"
+echo
+**********
+
+Output (first 500 chars):
+
+**********
+Hello mhasoba
+Hello mhasoba
+
+
+**********
+No errors.
+======================================================================
+Script: tiff2png.sh
+
+Contents:
+
+**********
+#!/bin/bash
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+for f in *.tif; 
+    do  
+        echo "Converting $f"; 
+        convert "$f"  "$(basename "$f" .tif).png"; 
+    done
+**********
+
+Output (first 500 chars):
+
+**********
+Error: No input provided
+
+**********
+No errors.
+======================================================================
+Script: boilerplate.sh
+
+Contents:
+
+**********
+#!/bin/sh
+# Author: zy3425@imperial.ac.uk
+# Script: boilerplate.sh
+# Desc: simple boilerplate for shell scripts
+# Arguments: none
+# Date: Sep 2025
+
+echo -e "\nThis is a shell script! \n"
+exit # successful completion
+**********
+
+Output (first 500 chars):
+
+**********
+
+This is a shell script! 
+
+
+**********
+No errors.
+======================================================================
+Script: tabtocsv.sh
+
+Contents:
+
+**********
+#!/bin/sh
+# Author: zy3425@imperial.ac.uk
+# Script: tabtocsv.sh
+# Description: substitute the tabs in the files with commas
+#
+# Saves the output into a .csv file
+# Arguments: 1 -> tab delimited file
+# Date: Sep 2025
+
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+echo "Creating a comma delimited version of $1 ..."
+cat $1 | tr -s "\t" "," >> $1.csv
+echo -e "test \t\t test" >> ../sandbox/test.txt # relative path
+echo "Done!"
+exit
+
+**********
+
+Output (first 500 chars):
+
+**********
+Error: No input provided
+
+**********
+No errors.
+======================================================================
+Script: countLines.sh
+
+Contents:
+
+**********
+#!/bin/bash
+
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+NumLines=`wc -l < $1`
+echo "The file $1 has $NumLines lines"
+echols
+**********
+
+Output (first 500 chars):
+
+**********
+Error: No input provided
+
+**********
+No errors.
+======================================================================
+Script: variables.sh
+
+Contents:
+
+**********
+#!/bin/sh
+
+## Illustrates the use of variables 
+
+# Special variables
+
+echo "This script was called with $# parameters"
+echo "The script's name is $0"
+echo "The arguments are $@"
+echo "The first argument is $1"
+echo "The second argument is $2"
+
+# Assigned Variables; Explicit declaration:
+MY_VAR='learning shell scripting is not fun!' 
+echo 'the current value of the variable is:' $MY_VAR
+echo #space line
+echo 'Please enter a new string'
+read MY_VAR
+echo
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+echo 'the current value of the variable is:' $MY_VAR
+echo #space line
+
+## Assigned Variables; Reading (multiple values) from user input:
+echo 'Enter two numbers separated by space(s)'
+read a b
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+echo #space line
+echo 'you entered' $a 'and' $b '; Their sum is:'
+
+## Assigned Variables; Command substitution
+MY_SUM=$(expr $a + $b)
+echo $MY_SUM
+**********
+
+Output (first 500 chars):
+
+**********
+This script was called with 0 parameters
+The script's name is variables.sh
+The arguments are 
+The first argument is 
+The second argument is 
+the current value of the variable is: learning shell scripting is not fun!
+
+Please enter a new string
+
+Error: No input provided
+
+**********
+No errors.
+======================================================================
+Script: compileLaTeX.sh
+
+Contents:
+
+**********
+#!/bin/bash
+# Compile LaTeX document
+
+if [ $# -eq 0 ]; then # Check if any arguments are provided
+    echo "Error: No input provided"
+    exit 1
+fi
+
+if [[ $file != *.tex ]]; then
+    echo "Error: Input file is not a .tex file"
+    exit 1
+fi
+
+
+if [[ $1 == *.tex ]]; then
+    filename=${1%.tex} # Remove file extension
+else
+    filename=$1 # Use the provided name
+fi
+
+pdflatex $filename.tex
+bibtex $filename
+pdflatex $filename.tex
+pdflatex $filename.tex
+evince $filename.pdf &
+
+## Cleanup
+rm *.aux
+rm *.log
+rm *.bbl
+rm *.blg
+**********
+
+Output (first 500 chars):
+
+**********
+Error: No input provided
+
+**********
+No errors.
+
+======================================================================
+FEEDBACK SUMMARY
+======================================================================
+
+Scripts tested: 12
+Scripts successful: 12
+Scripts with errors: 0
+Warnings/Notes: 1
+
+IMPORTANT DEBUGGING GUIDANCE:
+------------------------------
+
+Please review all warnings and errors, and your directory structure based on the above log.
+
+Ask yourself: Why did I not get these warnings or errors on my machine when I tested my code?
+Common reasons for environment differences:
+
+• File paths: Your local machine may have different directory structures
+• Dependencies: Missing packages or different versions
+• File permissions: Scripts may not be executable on the testing server
+• Case sensitivity: Linux systems are case-sensitive (your laptop may not be)
+• Working directory: Scripts may assume they run from a specific location
+• Input files: Required data files may be missing or in wrong locations
+
+Debugging steps:
+1. Test your code in a clean environment (fresh directory)
+2. Check all file paths are relative and correct
+3. Verify all required files are present and properly named
+4. Test on a case-sensitive system if possible
+5. Run your scripts from different directories to check robustness
+
+Fix these issues and test again. Good debugging skills are essential for scientific computing!
+
