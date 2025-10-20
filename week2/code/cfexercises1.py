@@ -33,11 +33,14 @@ def foo_5(x=1): # a recursive function that calculates the factorial of x
         return "Error negative numbers"
 
 def foo_6(x=1): # Calculate the factorial of x without if statement
-    facto = 1
-    while x > 0:
-        facto = facto * x
-        x = x - 1
-    return facto
+    if x < 0:
+        return "Error negative numbers"
+    else:
+        facto = 1
+        while x > 0:
+            facto = facto * x
+            x = x - 1
+            return facto
 
 def main(argv):
 
