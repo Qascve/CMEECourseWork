@@ -4,6 +4,14 @@ import sys
 from fuzzywuzzy import fuzz
 
 
+def check_required_package():  # Check for required package
+    try:
+        __import__('fuzzywuzzy')
+    except ImportError:
+        print("Error: The fuzzywuzzy package is missing. Please install it to proceed.")
+        sys.exit(1)
+
+
 #Define function
 def is_an_oak(name):
     # """ Returns True if name is starts with 'quercus' 

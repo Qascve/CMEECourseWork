@@ -55,23 +55,39 @@ def main(argv):
 
     else:
         print(" Now input your own values for x, y and z")
-        x = input("Enter a number for x: ")
-        if not x.isdigit():
-            print("Error: x should be a number")
-            return 1
-        x = int(x)
+        try:
+            x = input("Enter a number for x: ")
+            if not x:  # check for empty input
+                print("Error: No input provided for x")
+                return 1
+            if not x.isdigit():
+                print("Error: x should be a number")
+                return 1
+            x = int(x)
+            
+            y = input("Enter a number for y: ")
+            if not y:  # check for empty input
+                print("Error: No input provided for y")
+                return 1
+            if not y.isdigit():
+                print("Error: y should be a number")
+                return 1
+            y = int(y)
         
-        y = input("Enter a number for y: ")
-        if not y.isdigit():
-            print("Error: y should be a number")
+            z = input("Enter a number for z: ")
+            if not z:   # check for empty input
+                print("Error: No input provided for z")
+                return 1
+            if not z.isdigit():
+                print("Error: z should be a number")
+                return 1
+            z = int(z)
+        except EOFError:
+            print("Error: Input was terminated unexpectedly")
             return 1
-        y = int(y)
-       
-        z = input("Enter a number for z: ")
-        if not z.isdigit():
-            print("Error: z should be a number")
+        except KeyboardInterrupt:
+            print("\nProgram terminated by user")
             return 1
-        z = int(z)
 
         print(foo_1(x))
         print(foo_2(x,y))
