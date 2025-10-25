@@ -1,0 +1,40 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+
+\title{Florida Correlation Result}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Result Explanation}
+
+The analysis shows a positive correlation between the two variables, with $p = 0.5332$.
+The $p$-value is $0$, which means the result is statistically significant.
+In other words, the observed relationship is very unlikely to have happened by chance.
+
+\begin{figure}[]
+  \centering
+  \includegraphics[width=0.4\textwidth]{../results/Florida_analysis1.pdf}
+  \caption{Key West annual temperature trends with linear regression (1901-2000)}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{../results/Florida_analysis2.pdf}
+  \caption{Distribution of random correlations from permutation test}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=0.4\textwidth]{../results/Florida_analysis3.pdf}
+  \caption{Temperature changes relative to 1901-1905 baseline}
+\end{figure}
+
+\end{document}
