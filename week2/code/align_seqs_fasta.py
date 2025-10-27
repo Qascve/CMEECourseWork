@@ -83,5 +83,4 @@ results_file = os.path.join(results_dir, 'align_fasta.csv')
 with open(results_file, 'w', newline='') as file:
     file = csv.writer(file)
     file.writerow([my_best_align])
-    file.writerow([s1])
     file.writerow(["Best score:" + str(my_best_score)])
