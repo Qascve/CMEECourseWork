@@ -1,9 +1,19 @@
 import os
 import csv
 
-with open('../data/DNA1.txt', 'r') as s1, open('../data/DNA2.txt', 'r') as s2:
-    s1 = s1.read() 
-    s2 = s2.read()
+
+def read_fasta(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    seq = ''
+    for line in lines:
+        if not line.startswith('>'):
+            seq += line.strip()
+    return seq
+
+
+s1 = read_fasta('../data/407228412.fasta')
+s2 = read_fasta('../data/407228326.fasta')
 # Two example sequences to match
 # seq2 = "ATCGCCGGATTACGGG"
 # seq1 = "CAATTCGGAT"
@@ -68,7 +78,7 @@ results_dir = '../results'
 if not os.path.exists(results_dir):
     os.makedirs(results_dir)
 
-results_file = os.path.join(results_dir, 'align.csv')
+results_file = os.path.join(results_dir, 'align_fasta.csv')
 
 with open(results_file, 'w', newline='') as file:
     file = csv.writer(file)
