@@ -3,13 +3,14 @@
 ################################################################
 
 library(tidyverse)  # includes dplyr, tidyr, readr, ggplot2, etc.
+library(here)       # for constructing file paths
 
 ############# Load the dataset ###############
 # header = FALSE because the raw data don't have real headers
-MyData <- read_csv("../data/PoundHillData.csv", col_names = FALSE)
+MyData <- read_csv(here("week4", "data", "PoundHillData.csv"), col_names = FALSE)
 
 # header = TRUE because metadata has real headers
-MyMetaData <- read_csv2("../data/PoundHillMetaData.csv")
+MyMetaData <- read_csv2(here("week4", "data", "PoundHillMetaData.csv"))
 
 ############# Inspect the dataset ###############
 head(MyData)

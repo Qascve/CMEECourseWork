@@ -1,10 +1,9 @@
 # Load required libraries
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(here))
+library(ggplot2)
+library(dplyr)
+library(here)
 
-MyDF <- read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"), 
-                 stringsAsFactors = FALSE)
+MyDF <- read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"), stringsAsFactors = FALSE)
 
 # Data cleaning: remove rows with missing values in key columns
 MyDF <- MyDF[complete.cases(MyDF[, c("Predator.mass", "Prey.mass", "Type.of.feeding.interaction", "Predator.lifestage")]), ]
@@ -13,22 +12,17 @@ MyDF <- MyDF[complete.cases(MyDF[, c("Predator.mass", "Prey.mass", "Type.of.feed
 MyDF <- MyDF[MyDF$Predator.mass > 0 & MyDF$Prey.mass > 0, ]
 
 # Faceted by feeding type, colored by predator life stage
-p <- ggplot(MyDF, aes(x = Prey.mass, y = Predator.mass, 
-                      color = Predator.lifestage)) +
+p <- ggplot(MyDF, aes(x = Prey.mass, y = Predator.mass, color = Predator.lifestage)) +
   # Add semi-transparent points
   geom_point(alpha = 0.6, size = 1.5) +
   # Create separate panels for each feeding interaction type
   facet_grid(Type.of.feeding.interaction ~ ., scales = "fixed") +
   # Add regression lines with confidence intervals for each life stage
-  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8, alpha = 0.2,
-              formula = y ~ x) +  # Explicitly specify formula to suppress message
-  # Apply log10 transformation to both axes
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8, alpha = 0.2, formula = y ~ x) +
   scale_x_log10(name = "Prey Mass in grams") +
-  scale_y_log10(name = "Predator mass in grams", 
-                labels = scales::scientific) +
+  scale_y_log10(name = "Predator mass in grams", labels = scales::scientific) +
   # Use black and white theme
   theme_bw() +
-  # Customize theme elements
   theme(
     strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
     strip.background = element_rect(fill = "lightgray"),
@@ -65,9 +59,8 @@ life_stages <- unique(MyDF$Predator.lifestage)
 for (feeding in feeding_types) {
   for (stage in life_stages) {
     # Subset data for current combination
-    subset_data <- MyDF[MyDF$Type.of.feeding.interaction == feeding & 
-                        MyDF$Predator.lifestage == stage, ]
-    
+    subset_data <- MyDF[MyDF$Type.of.feeding.interaction == feeding & MyDF$Predator.lifestage == stage, ]
+
     # Only perform regression if there are at least 3 data points
     if (nrow(subset_data) >= 3) {
       # Fit linear model to log-transformed data
@@ -88,10 +81,7 @@ for (feeding in feeding_types) {
       f_statistic <- model_summary$fstatistic[1]
       
       # Calculate p-value from F-statistic
-      p_value <- pf(model_summary$fstatistic[1], 
-                   model_summary$fstatistic[2], 
-                   model_summary$fstatistic[3], 
-                   lower.tail = FALSE)
+      p_value <- pf(model_summary$fstatistic[1], model_summary$fstatistic[2], model_summary$fstatistic[3], lower.tail = FALSE)
       
       # Append results to the dataframe
       results <- rbind(results, data.frame(
