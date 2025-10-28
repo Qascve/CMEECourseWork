@@ -15,7 +15,7 @@ N <- 250
 M <- matrix(rnorm(N * N), N, N)
 
 eigvals <- eigen(M)$values
-
+MyBars.R
 # Build dataframe
 eigDF <- data.frame(
   "Real" = Re(eigvals),
@@ -31,7 +31,7 @@ names(ellDF) <- c("Real", "Imaginary")
 
 # Create plot
 p <- ggplot(eigDF, aes(x = Real, y = Imaginary)) +
-  geom_point(shape = I(3)) +
+  geom_point(shape = I(MyBars.R3)) +
   geom_hline(aes(yintercept = 0)) +
   geom_vline(aes(xintercept = 0)) +
   geom_polygon(
