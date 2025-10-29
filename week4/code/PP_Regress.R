@@ -8,6 +8,10 @@ MyDF <- read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"), stringsAs
 # Data cleaning: remove rows with missing values in key columns
 MyDF <- MyDF[complete.cases(MyDF[, c("Predator.mass", "Prey.mass", "Type.of.feeding.interaction", "Predator.lifestage")]), ]
 
+# Some records have mg units, need to convert to g (divide by 1000)
+mg_indices <- which(MyDF$Prey.mass.unit == "mg")
+MyDF$Prey.mass[mg_indices] <- MyDF$Prey.mass[mg_indices] / 1000
+
 # Filter out invalid mass values (zero or negative)
 MyDF <- MyDF[MyDF$Predator.mass > 0 & MyDF$Prey.mass > 0, ]
 
