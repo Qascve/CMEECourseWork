@@ -14,17 +14,17 @@ MyDF <- MyDF[MyDF$Predator.mass > 0 & MyDF$Prey.mass > 0, ]
 # Faceted by feeding type, colored by predator life stage
 p <- ggplot(MyDF, aes(x = Prey.mass, y = Predator.mass, color = Predator.lifestage)) +
   # Add semi-transparent points
-  geom_point(alpha = 0.6, size = 1.5) +
+  geom_point(alpha = 0.6, size = 1.5, shape = 3) +
   # Create separate panels for each feeding interaction type
   facet_grid(Type.of.feeding.interaction ~ ., scales = "fixed") +
   # Add regression lines with confidence intervals for each life stage
-  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8, alpha = 0.2, formula = y ~ x) +
+  geom_smooth(method = "lm", se = TRUE, linewidth = 0.8, fullrange = TRUE) +
   scale_x_log10(name = "Prey Mass in grams") +
   scale_y_log10(name = "Predator mass in grams", labels = scales::scientific) +
   # Use black and white theme
   theme_bw() +
   theme(
-    strip.text.y = element_text(angle = 0, hjust = 0, size = 8),
+    strip.text.y = element_text(angle = -90, hjust = 0, size = 10),
     strip.background = element_rect(fill = "lightgray"),
     legend.position = "bottom",
     legend.title = element_text(size = 10),
