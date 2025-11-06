@@ -15,7 +15,6 @@ N <- 250
 M <- matrix(rnorm(N * N), N, N)
 
 eigvals <- eigen(M)$values
-MyBars.R
 # Build dataframe
 eigDF <- data.frame(
   "Real" = Re(eigvals),
