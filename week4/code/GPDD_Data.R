@@ -37,4 +37,4 @@ dev.off()
 # with very few from other regions.
 
 
-cat("GPDD map saved to results/GPDD_map.pdf\n")
+print("GPDD map saved to results/GPDD_map.pdf\n")
