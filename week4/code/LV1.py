@@ -46,6 +46,6 @@ plt.grid()
 plt.xlabel('Resource density')
 plt.ylabel('Consumer density')
 plt.title('Consumer-Resource population dynamics')
-plt.show()# To display the figure
+# plt.show()# To display the figure
 
 f2.savefig('../results/LV_model2.pdf') #Save figure

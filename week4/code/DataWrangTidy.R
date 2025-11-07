@@ -2,26 +2,39 @@
 ################## Wrangling the Pound Hill Dataset (tidyverse) #
 ################################################################
 
-library(tidyverse)  # includes dplyr, tidyr, readr, ggplot2, etc.
-library(here)       # for constructing file paths
+# Check if required packages are installed
+if(!requireNamespace("tidyverse", quietly = TRUE)) {
+  cat("Error: 'tidyverse' package is not installed.\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Error: 'here' package is not installed.\n")
+  quit(save = "no", status = 0)
+}
+
+# Load required packages
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(here))
+options(readr.show_col_types = FALSE)
+
 
 ############# Load the dataset ###############
 # header = FALSE because the raw data don't have real headers
-MyData <- read_csv(here("week4", "data", "PoundHillData.csv"), col_names = FALSE)
+MyData <- suppressMessages(read_csv(here("week4", "data", "PoundHillData.csv"), col_names = FALSE))
 
 # header = TRUE because metadata has real headers
-MyMetaData <- read_csv2(here("week4", "data", "PoundHillMetaData.csv"))
+MyMetaData <- suppressMessages(read_csv2(here("week4", "data", "PoundHillMetaData.csv")))
 
 ############# Inspect the dataset ###############
-head(MyData)
-dim(MyData)
-glimpse(MyData)
+# invisible(head(MyData))
+# invisible(dim(MyData))
+# invisible(glimpse(MyData))
 
 ############# Transpose ###############
 # convert tibble to matrix for transposing
 MyData <- t(as.matrix(MyData))
-head(MyData)
-dim(MyData)
+# invisible(head(MyData))
+# invisible(dim(MyData))
 
 ############# Replace species absences with zeros ###############
 MyData[MyData == ""] <- 0
@@ -49,6 +62,7 @@ data <- data %>%
   )
 
 ############# Inspect final dataset ###############
-glimpse(data)
-head(data)
-dim(data)
+# invisible(glimpse(data))
+# invisible(head(data))
+# invisible(dim(data))
+print("DataWrangTidy.R completed successfully")

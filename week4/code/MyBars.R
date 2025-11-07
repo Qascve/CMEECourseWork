@@ -1,15 +1,14 @@
 library(ggplot2)
 library(here)
 
+# Check if input file exists
 file_path <- here("week4", "data", "Results.txt")
 if (!file.exists(file_path)) {
-  warning("Warning: '../data/Results.txt' not found. Skipping plot creation.")
-  quit(status = 0)
+  cat("Warning: Input file 'Results.txt' not found in data directory.\n")
+} else {
+  # Read data from file
+  a <- read.table(file_path, header = TRUE)
 }
-
-
-a <- read.table(file_path, header = TRUE)
-
 
 # Add ymin column
 a$ymin <- rep(0, nrow(a))
@@ -39,6 +38,9 @@ p <- p + scale_x_continuous("My x axis", breaks = seq(3, 5, by = 0.05)) +
          theme(legend.position = "none")
 
 # Save to PDF
-pdf("../results/MyBars.pdf")
+output_path <- here("week4", "results", "MyBars.pdf")
+pdf(output_path, width = 8, height = 6)
 print(p)
 dev.off()
+
+cat("Plot saved to:", output_path, "\n")

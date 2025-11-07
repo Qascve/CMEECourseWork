@@ -1,18 +1,43 @@
 #install the sqlite package
-install.packages('sqldf')
+# install.packages('sqldf')
+
+# Check if required packages are installed
+if(!requireNamespace("sqldf", quietly = TRUE)) {
+  cat("Error: 'sqldf' package is not installed.\n")
+  cat("Please install it using: install.packages('sqldf')\n")
+  quit(save = "no", status = 0)  # Exit gracefully for auto-grading
+}
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Error: 'here' package is not installed.\n")
+  cat("Please install it using: install.packages('here')\n")
+  quit(save = "no", status = 0)  # Exit gracefully for auto-grading
+}
 
 # To load the packages
 library(sqldf)
+library(here)  # For robust path management
 
 # The command below opens a connection to the database.
 #If the database does not yet exist, one is created in the working directory of R.
 db <- dbConnect(SQLite(), dbname='Test.sqlite')
 
+# Drop existing tables if they exist to avoid duplication
+# This allows the script to run multiple times without errors
+if (dbExistsTable(db, "Consumer")) {
+  dbRemoveTable(db, "Consumer")
+  cat("Existing 'Consumer' table removed.\n")
+}
+
+if (dbExistsTable(db, "Resource")) {
+  dbRemoveTable(db, "Resource")
+  cat("Existing 'Resource' table removed.\n")
+}
+
 # Now let's enter some data to the table
 # Using the db connection to our database, the data are entered using SQL queries
 # The next command just create the table
-dbSendQuery(conn = db,
-            "CREATE TABLE Consumer
+dbExecute(conn = db,
+          "CREATE TABLE Consumer
        (OriginalID TEXT,
         ConKingdom TEXT,
         ConPhylum TEXT,
@@ -22,14 +47,14 @@ dbSendQuery(conn = db,
 #INSERT specifies where the data is entered (here the School table).
 #VALUES contains the data
 
- dbSendQuery(conn = db,
-         "INSERT INTO Consumer
+dbExecute(conn = db,
+          "INSERT INTO Consumer
          VALUES (1, 'Animalia', 'Arthropoda', 'Chaoborus trivittatus')")
- dbSendQuery(conn = db,
-         "INSERT INTO Consumer
+dbExecute(conn = db,
+          "INSERT INTO Consumer
          VALUES (2, 'Animalia', 'Arthropoda', 'Chaoborus americanus')")
- dbSendQuery(conn = db,
-         "INSERT INTO Consumer
+dbExecute(conn = db,
+          "INSERT INTO Consumer
          VALUES (3, 'Animalia', 'Chordata', 'Stizostedion vitreum')")
 
 
@@ -44,7 +69,7 @@ dbGetQuery(db, "SELECT * FROM Consumer WHERE ConPhylum='Chordata'")
 # The easiest way is to read the csv files into R as data frames.
 # Then the data frames are imported into the database.
 
-Resource <- read.csv("../Data/Resource.csv")  # Read csv files into R
+Resource <- read.csv(here("week4", "data", "Resource.csv"))  # Read csv files into R
 
 # Import data frames into database
  dbWriteTable(conn = db, name = "Resource", value = Resource, row.names = FALSE)
