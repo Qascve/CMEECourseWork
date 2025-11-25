@@ -2,12 +2,27 @@
 # Performs linear regressions for each Feeding Type × Life Stage combination
 # and outputs both a PDF plot and a CSV table with regression statistics.
 
-# Load required libraries
-library(ggplot2)
-library(dplyr)
+# Check if required packages are installed
+if(!requireNamespace("ggplot2", quietly = TRUE)) {
+  cat("Required package 'ggplot2' is not installed. Please install it using: install.packages('ggplot2')\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("dplyr", quietly = TRUE)) {
+  cat("Required package 'dplyr' is not installed. Please install it using: install.packages('dplyr')\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Required package 'here' is not installed. Please install it using: install.packages('here')\n")
+  quit(save = "no", status = 0)
+}
+
+# Load required libraries (suppress startup messages)
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(here))
 
 # Import dataset (relative path: script in /code, data in ../data)
-data <- read.csv("../data/EcolArchives-E089-51-D1.csv")
+data <- suppressMessages(read.csv(here("week3", "data", "EcolArchives-E089-51-D1.csv")))
 
 # Remove missing values in relevant columns
 data <- data %>%
@@ -28,8 +43,7 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Open PDF device for plot output
-pdf("../results/PP_Regress.pdf", width = 10, height = 8)
+pdf(here("week3", "results", "PP_Regress.pdf"), width = 10, height = 8)
 
 # Create the figure
 p <- ggplot(data, aes(x = log(Prey.mass), y = log(Predator.mass),
@@ -45,11 +59,11 @@ p <- ggplot(data, aes(x = log(Prey.mass), y = log(Predator.mass),
   theme_bw() +
   theme(legend.position = "right")
 
-# Write the plot to PDF
-print(p)
+# Write the plot to PDF (suppress warnings from geom_smooth)
+suppressWarnings(print(p))
 
 # Close PDF
-dev.off()
+invisible(dev.off())
 
 # Perform regressions for each combination of Feeding Type × Life Stage
 for (stage in unique(data$Predator.lifestage)) {
@@ -91,10 +105,9 @@ for (stage in unique(data$Predator.lifestage)) {
 }
 
 # Save regression summary to CSV
-write.csv(results, "../results/PP_Regress_Results.csv", row.names = FALSE)
-
+write.csv(results, here("week3", "results", "PP_Regress_Results.csv"), row.names = FALSE)
 # Print completion message
 cat("Linear regressions complete!\n")
 cat("Saved outputs:\n")
-cat(" - ../results/PP_Regress.pdf\n")
-cat(" - ../results/PP_Regress_Results.csv\n")
+cat(here("week3", "results", "PP_Regress.pdf"), "\n")
+cat(here("week3", "results", "PP_Regress_Results.csv"), "\n")

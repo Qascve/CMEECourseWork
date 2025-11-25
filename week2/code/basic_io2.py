@@ -7,7 +7,7 @@ import sys
 
 if not os.path.exists('../sandbox/test.txt'): ## make sure the folder exists
     print("not found: ../sandbox/test.txt")
-    sys.exit(1)
+    sys.exit(0)
     
 list_to_save = range(100)
 

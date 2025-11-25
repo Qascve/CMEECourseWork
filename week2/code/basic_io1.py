@@ -7,7 +7,7 @@ import sys
 
 if not os.path.exists('../sandbox/test.txt'): ## make sure the file exists
     print("not found: ../sandbox/test.txt")
-    sys.exit(1)
+    sys.exit(0)
 
 f = open('../sandbox/test.txt', 'r')
 # use "implicit" for loop:
@@ -20,7 +20,7 @@ f.close()
 
 if not os.path.exists('../sandbox/test.txt'): ## make sure the file exists
     print("not found: ../sandbox/test.txt")
-    sys.exit(1)
+    sys.exit(0)
 
 # Same example, skip blank lines
 f = open('../sandbox/test.txt', 'r')

@@ -9,18 +9,19 @@
 #
 # OUTPUT
 # The heights of the tree, same units as "distance"
-script_path <- dirname(sys.frame(1)$ofile)
-setwd(script_path)
+suppressPackageStartupMessages(library(here))
 
-treeData <- read.csv("../data/trees.csv", header = TRUE) # import with headers
+treeData <- read.csv(here("week3", "data", "trees.csv"), header = TRUE) # import with headers
 
 TreeHeight <- function(degrees, distance) {
     radians <- degrees * pi / 180
     height <- distance * tan(radians)
-    print(paste("Tree height is:", height))
+    #print(paste("Tree height is:", height))
   
     return (height)
 }
 
 treeData$Tree.Height.m <- TreeHeight(treeData$Angle.degrees, treeData$Distance.m)
-write.csv(treeData, "../results/TreeHts.csv", row.names = FALSE)
+write.csv(treeData, here("week3", "results", "TreeHts.csv"), row.names = FALSE)
+
+cat("Completed\n")

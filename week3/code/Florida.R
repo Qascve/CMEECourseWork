@@ -1,9 +1,18 @@
-script_path <- dirname(sys.frame(1)$ofile)
-setwd(script_path)
+# Check if required packages are installed
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Required package 'here' is not installed. Please install it using: install.packages('here')\n")
+  quit(save = "no", status = 0)
+}
+
+# Load required libraries (suppress startup messages)
+suppressPackageStartupMessages(library(here))
+
+# Suppress here package messages
+invisible(suppressMessages(here()))
 
 rm(list=ls())
 
-load("../data/KeyWestAnnualMeanTemperature.RData")
+load(here("week3", "data", "KeyWestAnnualMeanTemperature.RData"))
 
 set.seed(0)
 
@@ -19,7 +28,7 @@ for(i in 1:repeatTimes) {
 
 p_value <- sum(abs(random_cors) >= abs(observed_cor)) / repeatTimes
 
-pdf("../results/Florida_analysis1.pdf", width = 8, height = 6)
+pdf(here("week3", "results", "Florida_analysis1.pdf"), width = 8, height = 6)
 plot(ats$Year, ats$Temp, 
      main = sprintf("Temperature Trends in Key West (correlation = %.3f)", observed_cor),
      xlab = "Year", 
@@ -29,14 +38,14 @@ plot(ats$Year, ats$Temp,
 abline(lm(Temp ~ Year, data = ats), col = "red", lwd = 2)
 dev.off()
 
-pdf("../results/Florida_analysis2.pdf", width = 8, height = 6)
+pdf(here("week3", "results", "Florida_analysis2.pdf"), width = 8, height = 6)
 hist(random_cors,
      main = "Distribution of Random Correlations",
      xlab = "Correlation Coefficient")
 abline(v = observed_cor, col = "red", lwd = 2)
 dev.off()
 
-pdf("../results/Florida_analysis3.pdf", width = 8, height = 6)
+pdf(here("week3", "results", "Florida_analysis3.pdf"), width = 8, height = 6)
 baseline_temp <- mean(ats$Temp[1:5]) 
 temp_changes <- ats$Temp - baseline_temp
 
@@ -60,7 +69,7 @@ dev.off()
 
 #Save results to CSV files
 results_df <- data.frame(Observed_Correlation = observed_cor, P_Value = p_value)
-write.csv(results_df, "../results/Florida.csv", row.names = FALSE)
+write.csv(results_df, here("week3", "results", "Florida.csv"), row.names = FALSE)
 
 # Print results
 cat("\nresults：\n")

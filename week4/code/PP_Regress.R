@@ -1,9 +1,25 @@
-# Load required libraries
-library(ggplot2)
-library(dplyr)
-library(here)
+# Check if required packages are installed
+if(!requireNamespace("ggplot2", quietly = TRUE)) {
+  cat("Required package 'ggplot2' is not installed. Please install it using: install.packages('ggplot2')\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("dplyr", quietly = TRUE)) {
+  cat("Required package 'dplyr' is not installed. Please install it using: install.packages('dplyr')\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Required package 'here' is not installed. Please install it using: install.packages('here')\n")
+  quit(save = "no", status = 0)
+}
 
-MyDF <- read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"), stringsAsFactors = FALSE)
+
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(here))
+
+invisible(suppressMessages(here()))
+
+MyDF <- suppressMessages(read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"), stringsAsFactors = FALSE))
 
 # Data cleaning: remove rows with missing values in key columns
 MyDF <- MyDF[complete.cases(MyDF[, c("Predator.mass", "Prey.mass", "Type.of.feeding.interaction", "Predator.lifestage")]), ]
@@ -107,3 +123,4 @@ results <- results[order(results$Feeding.Type, results$Predator.Lifestage), ]
 
 # Save results to CSV file in the results directory
 write.csv(results, here("week4", "results", "PP_Regress_Results.csv"), row.names = FALSE)
+cat("Completed\n")

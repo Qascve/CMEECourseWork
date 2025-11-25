@@ -30,7 +30,7 @@ names(ellDF) <- c("Real", "Imaginary")
 
 # Create plot
 p <- ggplot(eigDF, aes(x = Real, y = Imaginary)) +
-  geom_point(shape = I(MyBars.R3)) +
+  geom_point(shape = I(3)) +
   geom_hline(aes(yintercept = 0)) +
   geom_vline(aes(xintercept = 0)) +
   geom_polygon(
@@ -45,4 +45,4 @@ pdf(here("week4", "results", "Girko.pdf"), width = 8, height = 8)
 print(p)
 dev.off()
 
-print("Complete")
+cat("Complete\n")

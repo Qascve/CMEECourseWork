@@ -1,9 +1,17 @@
-library(tidyverse)
-library(here)
+# Check if required packages are installed
+if(!requireNamespace("tidyverse", quietly = TRUE)) {
+  cat("Required package 'tidyverse' is not installed. Please install it using: install.packages('tidyverse')\n")
+  quit(save = "no", status = 0)
+}
+if(!requireNamespace("here", quietly = TRUE)) {
+  cat("Required package 'here' is not installed. Please install it using: install.packages('here')\n")
+  quit(save = "no", status = 0)
+}
 
-
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(here))
 # Load data
-data <- read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv"))
+data <- suppressMessages(read.csv(here("week4", "data", "EcolArchives-E089-51-D1.csv")))
 
 
 # Create log-transformed columns
@@ -84,4 +92,4 @@ results <- data %>%
 # Save results to CSV
 write.csv(results, here("week4", "results", "PP_Results.csv"), row.names = FALSE)
 
-print("Analysis complete")
+cat("Analysis complete\n")

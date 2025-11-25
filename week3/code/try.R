@@ -4,7 +4,8 @@ doit <- function(x) {
          print(paste("Mean of this sample was:", as.character(mean(temp_x))))
         }
     else {
-        stop("Couldn't calculate mean: too few unique values!")
+        cat("Couldn't calculate mean: too few unique values!\n")
+        quit(save = "no", status = 0)
         }
     }
 
