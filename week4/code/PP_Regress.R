@@ -55,6 +55,12 @@ p <- ggplot(MyDF, aes(x = Prey.mass, y = Predator.mass, color = Predator.lifesta
   # Set legend title
   labs(color = "Predator.lifestage")
 
+# Ensure results directory exists
+results_dir <- here("week4", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
+
 # Save the plot to PDF in the results directory
 pdf(here("week4", "results", "PP_Regress.pdf"), width = 10, height = 12)
 suppressWarnings(print(p))

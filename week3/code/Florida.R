@@ -28,6 +28,12 @@ for(i in 1:repeatTimes) {
 
 p_value <- sum(abs(random_cors) >= abs(observed_cor)) / repeatTimes
 
+# Ensure results directory exists
+results_dir <- here("week3", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
+
 pdf(here("week3", "results", "Florida_analysis1.pdf"), width = 8, height = 6)
 plot(ats$Year, ats$Temp, 
      main = sprintf("Temperature Trends in Key West (correlation = %.3f)", observed_cor),

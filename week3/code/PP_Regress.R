@@ -43,6 +43,12 @@ results <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Ensure results directory exists
+results_dir <- here("week3", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
+
 pdf(here("week3", "results", "PP_Regress.pdf"), width = 10, height = 8)
 
 # Create the figure

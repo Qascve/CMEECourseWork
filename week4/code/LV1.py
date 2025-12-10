@@ -1,6 +1,7 @@
 import numpy as np
 import scipy as sc
 import matplotlib.pylab as plt
+import os
 
 def dCR_dt(pops, t=0):
 
@@ -36,6 +37,11 @@ plt.xlabel('Time')
 plt.ylabel('Population density')
 plt.title('Consumer-Resource population dynamics')
 # plt.show()# To display the figure
+
+# Ensure results directory exists
+results_dir = '../results'
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
 
 f1.savefig('../results/LV_model.pdf') #Save figure
 

@@ -38,6 +38,12 @@ p <- p + scale_x_continuous("My x axis", breaks = seq(3, 5, by = 0.05)) +
          theme_bw() +
          theme(legend.position = "none")
 
+# Ensure results directory exists
+results_dir <- here("week4", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
+
 # Save to PDF
 output_path <- here("week4", "results", "MyBars.pdf")
 pdf(output_path, width = 8, height = 6)

@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sc
 import matplotlib.pylab as plt
 import sys
+import os
 
 # Define the Lotka-Volterra model with resource density dependence
 def dCR_dt(pops, t=0):
@@ -46,6 +47,12 @@ plt.xlabel('Time')
 plt.ylabel('Population density')
 plt.title('Consumer-Resource population dynamics\n' + \
          f'r={r:.1f} a={a:.1f} z={z:.1f} e={e:.1f} K={K:.1f}')
+
+# Ensure results directory exists
+results_dir = '../results'
+if not os.path.exists(results_dir):
+    os.makedirs(results_dir)
+
 f1.savefig('../results/LV2_model.pdf')
 
 # Create the phase plot

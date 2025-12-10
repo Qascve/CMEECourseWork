@@ -40,6 +40,12 @@ p <- ggplot(eigDF, aes(x = Real, y = Imaginary)) +
   theme(legend.position = "none") +
   ggtitle("Girko Circular Law")
 
+# Ensure results directory exists
+results_dir <- here("week4", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
+
 # Save plot to PDF
 pdf(here("week4", "results", "Girko.pdf"), width = 8, height = 8)
 print(p)

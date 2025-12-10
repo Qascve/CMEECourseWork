@@ -25,6 +25,11 @@ data <- data %>%
 # Get all feeding types
 feeding_types <- unique(data$Type.of.feeding.interaction)
 
+# Ensure results directory exists
+results_dir <- here("week4", "results")
+if (!dir.exists(results_dir)) {
+  dir.create(results_dir, recursive = TRUE)
+}
 
 # Plot: Predator mass distributions
 pdf(here("week4", "results", "Pred_Subplots.pdf"),width=10, height=12)
