@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import sympy as sp
+
 
 # Exercise 2
 D = np.linspace(0.5, 5, 200)
