@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Bootcamp_Assessment_ZhouYang_zy3425</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Bootcamp_Assessment_ZhouYang_zy3425</h1>
+</header>
+<h1 id="bootcamp-assessment-zhou-yang">Bootcamp Assessment: Zhou
+Yang</h1>
+<h2 id="execution-results">Execution results</h2>
+<ul>
+<li>Scripts executed (total in log): <strong>69</strong></li>
+<li>Non-zero exit codes: <strong>10</strong> (mostly due to missing CLI
+arguments / interactive prompts / environment packages)</li>
+</ul>
+<p><strong>Notable non-zero exits (examples):</strong> -
+<code>cfexercises1.py</code>: prompts for interactive input → automated
+run terminates input (exit 1, stdout shows handled EOF). -
+<code>tabtocsv.sh</code> / <code>ConcatenateTwoFiles.sh</code>: designed
+to require arguments; run without args exits 1 with usage/error message.
+- <code>LV1.py</code>, <code>LV2.py</code>: fail in this environment due
+to missing <code>numpy</code> (ModuleNotFoundError) → treat as
+<em>present but not validated</em>.</p>
+<h2 id="script-specific-feedback">Script-Specific Feedback</h2>
+<blockquote>
+<p>Representative scripts chosen to cover: strong examples, assigned
+scripts, execution issues, and common style/robustness problems.
+Representative scripts selected to cover: interactive execution issues,
+argument-dependent scripts, environment-limited failures, reporting
+scripts, and the key groupwork script <code>TAutoCorr.R</code>.</p>
+</blockquote>
+<h3 id="tabtocsv.sh">tabtocsv.sh</h3>
+<p>Status: <strong>Present but not validated (non-zero
+exit)</strong></p>
+<p>Evidence (from LOG): - Exit code: 1 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>Exit 1 happens because the script is <strong>correctly enforcing
+required arguments</strong> (prints
+<code>Error: No input provided</code>). This is appropriate for a CLI
+tool and counts as basic validation evidence.</li>
+</ul>
+<p>Improvement suggestion: - Add a short usage line (e.g.,
+<code>Usage: tabtocsv.sh &lt;file.tsv&gt;</code>) and write output with
+<code>&gt;</code> (overwrite) rather than <code>&gt;&gt;</code> (append)
+to avoid duplicating results on reruns.</p>
+<h3 id="cfexercises1.py">cfexercises1.py</h3>
+<p>Status: <strong>Present but not validated (non-zero
+exit)</strong></p>
+<p>Evidence (from LOG): - Exit code: 1 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>The script is <strong>clearly functional as an interactive
+exercise</strong>; it prints a friendly message and catches EOF, which
+is good bootcamp-level robustness. The automated runner provides no
+input, so it exits 1.</li>
+</ul>
+<p>Improvement suggestion: - Add a non-interactive mode (e.g., accept
+<code>x y z</code> via <code>sys.argv</code> when provided) and only
+prompt when args are missing.</p>
+<h3 id="lv1.py">LV1.py</h3>
+<p>Status: <strong>Present but not validated (non-zero
+exit)</strong></p>
+<p>Evidence (from LOG): - Exit code: 1 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>Failure is <strong>environmental</strong>
+(<code>ModuleNotFoundError: numpy</code>) rather than conceptual. Treat
+as <em>present but not validated</em>.</li>
+</ul>
+<p>Improvement suggestion: - Add a short dependency note in README
+and/or a guard message (<code>try: import numpy ... except: ...</code>)
+explaining how to install requirements.</p>
+<h3 id="align_seqs.py">align_seqs.py</h3>
+<p>Status: <strong>Ran successfully</strong></p>
+<p>Evidence (from LOG): - Exit code: 0 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>This script is assessed under assigned-script scope (Criterion 8).
+The log’s error-handling scan flags missing graceful handling for
+missing files in several assigned scripts, including alignment
+scripts.</li>
+</ul>
+<p>Improvement suggestion: - Add file existence checks
+(<code>os.path.exists</code>) and a clear usage/help message when
+arguments are missing; fail with a non-zero exit.</p>
+<h3 id="florida.r">Florida.R</h3>
+<p>Status: <strong>Ran successfully</strong></p>
+<p>Evidence (from LOG): - Exit code: 0 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>The script shows substantive analysis and reporting behaviour
+(creates results directory and writes PDFs). The error-handling scan
+flags limited input validation.</li>
+</ul>
+<p>Improvement suggestion: - Check the data path exists before
+<code>load()</code>/read, and provide an informative <code>stop()</code>
+message if missing.</p>
+<h3 id="pp_regress.r">PP_Regress.R</h3>
+<p>Status: <strong>Ran successfully</strong></p>
+<p>Evidence (from LOG): - Exit code: 0 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+- <code>geom_smooth()</code> using formula = ‘y ~ x’ - Output
+validation: Not performed / not available in log for most scripts
+(except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>Demonstrates applied modelling/reporting workflow. The log flags
+minimal error handling and includes a <code>geom_smooth()</code> note
+(not a failure).</li>
+</ul>
+<p>Improvement suggestion: - Add guards for missing/empty data, and
+ensure outputs go to <code>results/</code> with deterministic
+filenames.</p>
+<h3 id="compilelatex.sh">compileLaTeX.sh</h3>
+<p>Status: <strong>Present but not validated (non-zero
+exit)</strong></p>
+<p>Evidence (from LOG): - Exit code: 1 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+None reported - Output validation: Not performed / not available in log
+for most scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<p>Improvement suggestion: - Run <code>shellcheck</code> locally; ensure
+the <code>if</code>/<code>then</code> syntax is complete, and print a
+clear message if <code>pdflatex</code> is unavailable.</p>
+<h3 id="tautocorr.r">TAutoCorr.R</h3>
+<p>Status: <strong>Ran successfully</strong></p>
+<p>Evidence (from LOG): - Exit code: 0 - Missing from expected list: No
+(log states <em>All expected scripts are present</em>) - Tool warnings:
+- here() starts at
+/home/mhasoba/Documents/Teaching/MulQuaBio/MQB-TA/repos_groups/04_Dashing_Dingos
+- Output validation: Not performed / not available in log for most
+scripts (except expected-output pattern check)</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9</p>
+<ul>
+<li>Runs cleanly in the headless environment and produces both numeric
+output and a histogram plot; strong evidence for Criteria 2, 9, 10.</li>
+</ul>
+<p>Improvement suggestion: - Make the p-value tail explicit in code
+comments (one-sided positive correlation) and consider using
+<code>abs()</code> if the intended test is two-sided.</p>
+<h2 id="detailed-evaluation-tautocorr.r">Detailed Evaluation:
+TAutoCorr.R</h2>
+<h3 id="a.-specification-alignment">A. Specification Alignment</h3>
+<ul>
+<li><strong>Relative paths / non-interactive:</strong> Uses
+<code>here::here(...)</code> to load
+<code>KeyWestAnnualMeanTemperature.RData</code>; runs non-interactively
+(exit code 0).</li>
+<li><strong>Successive-year correlation:</strong> Computes
+<code>cor(temps[-length(temps)], temps[-1])</code> (creates
+<strong>n-1</strong> adjacent pairs).</li>
+<li><strong>Permutation analysis:</strong> Repeats
+<code>n_perm = 10000</code> permutations via <code>sample(temps)</code>
+and recomputes the same adjacent-pair correlation each time.</li>
+<li><strong>Permutation p-value:</strong> Computes
+<code>mean(perm_cor &gt;= obs_cor)</code> and prints it clearly.</li>
+<li><strong>Avoids <code>cor.test()</code> p-value:</strong> Uses
+permutation p-value as the reported value.</li>
+</ul>
+<p><strong>Overall:</strong> Implementation <strong>matches</strong> the
+core computational specification; write-up evidence is
+<strong>insufficiently visible</strong> in the provided log for
+confident validation. ### B. Conceptual Understanding of Autocorrelation
+- Correctly frames the question as <strong>temporal dependence</strong>
+between successive years (lag-1). - Breaks temporal structure by
+permutation to form a null distribution (appropriate for time-structure
+testing). - Reports an observed positive correlation (~0.326 in log
+stdout) and a small permutation p-value (~5e-04). ### C. Algorithmic
+Implementation Depth - Uses direct vector indexing for lag-1 pairs
+(clear and efficient). - Stores permutation correlations in a
+preallocated numeric vector (good practice). - Produces a histogram of
+the null distribution and draws a vertical line for the observed
+statistic. ### D. Statistical &amp; Computational Rigor - Uses
+<code>cor()</code> on adjacent pairs as the statistic (aligned with
+metadata). - Computes a one-sided p-value
+<code>P(null &gt;= observed)</code>; this is consistent with “positively
+correlated” framing in the metadata. - Uses a large number of
+permutations (10,000), which is appropriate for a stable approximate
+p-value at bootcamp level. ### E. Error Handling &amp; Robustness
+(Criterion 8 alignment) - Positive: explicit dependency check for
+<code>here</code> with a clear install hint. - Missing: no explicit
+checks for missing <code>Temp</code> column or missing/NA values; no
+short-series guard. ### F. Comparison with Example Solution -
+<strong>Similarities:</strong> lag-1 correlation via adjacent pairs;
+permutation by shuffling temperatures; compute p-value as tail fraction;
+report observed + p-value. - <strong>Key omissions vs typical robust
+patterns:</strong> explicit NA handling; explicit two-sided option;
+explicit reproducibility notes in a write-up (not confirmed in log). -
+<strong>Conceptual gaps:</strong> none obvious for the lag-1 permutation
+test framing. - <strong>Improvements beyond example (visible):</strong>
+produces a saved histogram PNG and writes a results text file in
+addition to console output. ### G. Required Script-Level Reporting Block
+#### TAutoCorr.R Status: <strong>Ran successfully (exit code
+0)</strong></p>
+<p>Specification alignment: - Matches core computational requirements
+(lag-1 cor, permutation null, permutation p-value, relative paths). -
+Write-up <code>.tex/.pdf</code> evidence for this specific task is
+<strong>not clearly confirmed</strong> in the log.</p>
+<p>Algorithmic evaluation: - Efficient vector indexing for lag pairs;
+preallocation for permutation results; clear plotting.</p>
+<p>Conceptual understanding: - Correctly tests “successive years
+positively correlated” using a permutation null.</p>
+<p>Statistical correctness: - Appropriate statistic and p-value
+computation for the stated one-sided hypothesis.</p>
+<p>Rubric relevance: - Criterion 2 - Criterion 3 - Criterion 8 -
+Criterion 9 - Criterion 10 - Criterion 11</p>
+<ul>
+<li>Strong evidence of correct method implementation and clear reporting
+outputs.</li>
+</ul>
+<p>Improvement suggestion: - Add NA/short-series guards and explicitly
+document the hypothesis tail (one- vs two-sided) in comments and the
+write-up.</p>
+<h2 id="overall-feedback">Overall feedback</h2>
+<h3 id="whats-working-well">What’s working well</h3>
+<ul>
+<li><strong>Consistent engagement:</strong> 58 commits in the individual
+repo, generally descriptive commit messages.</li>
+<li><strong>Good documentation habits:</strong> main README is good; 4
+weeks have week-level READMEs.</li>
+<li><strong>Core statistical reasoning:</strong> permutation approach in
+<code>TAutoCorr.R</code> is conceptually sound and well executed.</li>
+</ul>
+<h3 id="highest-impact-improvements">Highest-impact improvements</h3>
+<ol type="1">
+<li><strong>Make scripts runnable non-interactively by default
+(Criterion 2):</strong> support CLI args and provide usage; keep prompts
+as a fallback.</li>
+<li><strong>Strengthen error handling on assigned scripts (Criterion
+8):</strong> add file existence checks + informative failures (R:
+<code>file.exists()</code> + <code>stop()</code>; Python:
+<code>try/except</code> + clear message).</li>
+<li><strong>Reduce repo ambiguity / hygiene issues (Criterion
+1):</strong> avoid duplicate basenames across weeks; avoid committing
+generated PDFs to <code>code/</code> (or clearly separate
+<code>results/</code>).</li>
+<li><strong>Groupwork accountability (Criteria 6–7):</strong> add
+<code>CONTRIBUTIONS.md</code></li>
+</ol>
+<h2 id="groupwork-evaluation-criterion-6">Groupwork Evaluation
+(Criterion 6)</h2>
+<ul>
+<li><p>Group repo: <code>04_Dashing_Dingos</code> (URL and path present
+in log)</p></li>
+<li><p>Total commits: 61; branches: 4; merge commits: 14</p></li>
+<li><p>Log reports <strong>no feature/topic branches detected</strong>
+(work mostly on main)</p></li>
+<li><p><code>CONTRIBUTIONS.md</code> not found</p></li>
+<li><p>Collaboration is clearly active (many authors, merges), but the
+branching model appears limited / not captured as feature branches by
+the checker.</p></li>
+</ul>
+<h2 id="individual-group-contribution-criterion-7">Individual Group
+Contribution (Criterion 7)</h2>
+<ul>
+<li><p>Commits by student: 32 (matched authors: <code>Zhou</code>,
+<code>Zhou Yang</code>)</p></li>
+<li><p>Contribution ratio: 52.5% of total commits</p></li>
+<li><p>Total lines changed: 723</p></li>
+<li><p><code>CONTRIBUTIONS.md</code> absent</p></li>
+<li><p>Substantive, sustained contribution is visible, but
+accountability artefact (<code>CONTRIBUTIONS.md</code>) is missing and
+author aliasing slightly reduces confidence.</p></li>
+</ul>
+<h2 id="priority-fixes">Priority fixes</h2>
+<ol type="1">
+<li>Add CLI argument support / non-interactive paths for scripts that
+currently prompt (e.g., <code>cfexercises1.py</code>).</li>
+<li>Add basic file/argument validation for assigned scripts flagged in
+Criterion 8 scan (alignment scripts, <code>Florida.R</code>,
+<code>PP_Regress.R</code>).</li>
+<li>Add <code>CONTRIBUTIONS.md</code> to the group repo.</li>
+<li>Reduce committed generated outputs in <code>code/</code> and avoid
+duplicate basenames across weeks.</li>
+</ol>
+<h2 id="summary">Summary</h2>
+<p>Excellent work! Your submission shows strong engagement and clear
+methods implementation. The main limitations are around
+<strong>robustness/error handling</strong> and <strong>runnability
+without manual inputs/arguments</strong>, plus a missing group
+accountability file.</p>
+<h2 id="mark-classification">Mark classification</h2>
+<!-- Total Mark: **81/100** -->
+<p>Classification: <strong>Distinction</strong></p>
+</body>
+</html>
