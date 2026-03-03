@@ -1,0 +1,14 @@
+demographic cluster started
+PBS_ARRAY_INDEX=12
+PWD=/rds/general/user/zy3425/home/HPC/Code
+HOSTNAME=cx3-1-7
+demographic run completed
+
+====================================
+CPU Time used: 00:00:42
+CPU Percent: 75%
+Memory usage: 178756kb
+Approx Power usage: 0.0
+Walltime usage: 00:00:57
+
+====================================

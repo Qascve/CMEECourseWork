@@ -1,0 +1,15 @@
+neutral cluster started
+PBS_ARRAY_INDEX=18
+PWD=/rds/general/user/zy3425/home/HPC/Code
+HOSTNAME=cx3-2-6
+[1] 0.0050471
+neutral run completed
+
+====================================
+CPU Time used: 11:18:52
+CPU Percent: 99%
+Memory usage: 172472kb
+Approx Power usage: 0.13560000000000003
+Walltime usage: 11:31:51
+
+====================================
