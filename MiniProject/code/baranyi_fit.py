@@ -268,7 +268,7 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.figure(figsize=(7, 4.5))
     plt.scatter(t_raw, y_raw, s=18, alpha=0.55, color=color, label="Observed data")
     plt.plot(t_grid, y_hat_grid, linewidth=2.0, color=color, label="Fit line")
-    plt.title(f"Baranyi model fit at {temp:g} C")
+    plt.title(f"Baranyi model fit at {temp:g} °C")
     plt.xlabel("Time (Hours)")
     plt.ylabel("ln(population abundance, N)")
     plt.legend(loc="lower right")
@@ -292,14 +292,14 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
             s=10,
             alpha=0.25,
             color=color,
-            label=f"Observed data ({temp:g} C)",
+            label=f"Observed data ({temp:g} °C)",
         )
         plt.plot(
             t_grid,
             y_hat_grid,
             linewidth=2.0,
             color=color,
-            label=f"Fit line ({temp:g} C)",
+            label=f"Fit line ({temp:g} °C)",
         )
 
     plt.title("Baranyi model fits across temperatures")
