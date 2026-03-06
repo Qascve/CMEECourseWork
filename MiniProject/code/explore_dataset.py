@@ -24,6 +24,7 @@ print(f"data path: {data_path}")
 
 
 TOP_N = 10
+TARGET_TEMPS = {8, 16, 25}
 
 
 def load_data(csv_path: Path) -> pd.DataFrame:
@@ -89,6 +90,7 @@ def create_tetraselmis_tetrahele_dataset(
     subset = df[
         (df["Species"] == "Tetraselmis tetrahele") & (df["Medium"] == "ESAW")
     ].copy()
+    subset = subset[subset["Temp"].isin(TARGET_TEMPS)].copy()
     subset = subset.rename(columns={"Rep": "rep"})
     ordered_cols = [
         "Time",
