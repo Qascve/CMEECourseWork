@@ -6,7 +6,6 @@ import contextlib
 import importlib
 import io
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,7 +24,7 @@ def find_root(start_path: Path) -> Path:
 root_path = find_root(Path(__file__))
 data_path = root_path / "MiniProject" / "data" / "tetraselmis_tetrahele_log.csv"
 result_dir = root_path / "MiniProject" / "result" / "model_comparison_summary"
-selected_temp = 16.0
+selected_temp = 8
 
 
 def load_logged_subset(csv_path: Path) -> pd.DataFrame:
