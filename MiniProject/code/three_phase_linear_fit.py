@@ -285,7 +285,7 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.title(f"Three-phase linear model fit at {temp:g} C")
     plt.xlabel("Time (Hours)")
     plt.ylabel("ln(population abundance, N)")
-    plt.legend(loc="upper left")
+    plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(out_dir / f"three_phase_fit_temp{int(temp)}.svg")
     plt.close()
@@ -319,7 +319,7 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
     plt.title("Three-phase linear model fits across temperatures")
     plt.xlabel("Time (Hours)")
     plt.ylabel("ln(population abundance, N)")
-    plt.legend(fontsize=8, ncol=2, loc="upper left")
+    plt.legend(fontsize=8, ncol=2, loc="lower right")
     plt.tight_layout()
     out_path = out_dir / "three_phase_fit_all_temps.svg"
     plt.savefig(out_path)
