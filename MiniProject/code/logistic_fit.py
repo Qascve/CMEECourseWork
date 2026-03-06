@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from lmfit import Parameters, minimize
 
 
 def find_root(start_path: Path) -> Path:
@@ -19,9 +20,10 @@ def find_root(start_path: Path) -> Path:
 root_path = find_root(Path(__file__))
 data_path = Path("MiniProject") / "data" / "tetraselmis_tetrahele_log.csv"
 data_path = root_path / data_path
-result_dir = root_path / "MiniProject" / "result" / "ols_fit"
+result_dir = root_path / "MiniProject" / "result" / "logistic_fit"
 
-poly_degree = 3
+logistic_fit_n_starts = 50
+seed = 0
 
 print(f"root path: {root_path}")
 print(f"data path: {data_path}")
@@ -38,9 +40,10 @@ def load_data(csv_path: Path) -> pd.DataFrame:
 
 
 def filter_tetraselmis_esaw(df: pd.DataFrame) -> pd.DataFrame:
-    return df[
+    subset = df[
         (df["Species"] == "Tetraselmis tetrahele") & (df["Medium"] == "ESAW")
     ].copy()
+    return subset
 
 
 def summarize_temp_counts(df: pd.DataFrame) -> pd.DataFrame:
@@ -57,6 +60,46 @@ def get_temp_color(temp: float) -> str:
     return color_map.get(float(temp), "tab:gray")
 
 
+def logistic_3p(t: np.ndarray, theta: np.ndarray) -> np.ndarray:
+    # theta is in log-space so parameters remain positive after exp.
+    k, r, n0 = np.exp(np.clip(theta, -20, 20))
+    exp_arg = np.clip(-r * t, -700, 700)
+    with np.errstate(over="ignore", invalid="ignore"):
+        denom = 1.0 + ((k - n0) / n0) * np.exp(exp_arg)
+    denom = np.where(np.isfinite(denom), denom, 1e12)
+    denom = np.where(np.abs(denom) < 1e-12, 1e-12, denom)
+    return k / denom
+
+
+def residuals(theta: np.ndarray, t: np.ndarray, y_log: np.ndarray) -> np.ndarray:
+    y_pred = logistic_3p(t, theta)
+    y_pred_safe = np.clip(y_pred, 1e-12, None)
+    y_pred_log = np.log(y_pred_safe)
+    return y_log - y_pred_log
+
+
+def residuals_lmfit(params: Parameters, t: np.ndarray, y_log: np.ndarray) -> np.ndarray:
+    theta = np.array(
+        [
+            params["theta_k"].value,
+            params["theta_r"].value,
+            params["theta_n0"].value,
+        ],
+        dtype=float,
+    )
+    return residuals(theta, t, y_log)
+
+
+def initial_theta(t: np.ndarray, y_log: np.ndarray) -> np.ndarray:
+    y_pos = np.clip(np.exp(y_log), 1e-8, None)
+    n0_guess = float(np.percentile(y_pos, 5))
+    k_guess = float(np.percentile(y_pos, 95))
+    if k_guess <= n0_guess:
+        k_guess = float(y_pos.max() * 1.2)
+    r_guess = 0.1
+    return np.log([k_guess, r_guess, n0_guess])
+
+
 def prepare_logged_temp_data(temp_df: pd.DataFrame) -> pd.DataFrame:
     return (
         temp_df[["Time", "log_PopBio", "Temp"]]
@@ -64,6 +107,63 @@ def prepare_logged_temp_data(temp_df: pd.DataFrame) -> pd.DataFrame:
         .sort_values(by="Time")
         .reset_index(drop=True)
     )
+
+
+def fit_with_multistart(
+    t: np.ndarray, y_log: np.ndarray, n_starts: int, rng: np.random.Generator
+) -> tuple:
+    base_theta = initial_theta(t, y_log)
+    theta_candidates = [base_theta]
+    for _ in range(n_starts - 1):
+        noise = rng.normal(loc=0.0, scale=[0.35, 0.8, 0.35], size=3)
+        theta_candidates.append(base_theta + noise)
+
+    best_fit = None
+    best_y_hat = None
+    best_rss = np.inf
+    n_successful = 0
+
+    for theta0 in theta_candidates:
+        try:
+            params = Parameters()
+            params.add("theta_k", value=float(theta0[0]), min=-20, max=20)
+            params.add("theta_r", value=float(theta0[1]), min=-20, max=20)
+            params.add("theta_n0", value=float(theta0[2]), min=-20, max=20)
+            fit = minimize(
+                residuals_lmfit,
+                params,
+                args=(t, y_log),
+                method="leastsq",
+                max_nfev=5000,
+                nan_policy="omit",
+            )
+            theta_hat = np.array(
+                [
+                    fit.params["theta_k"].value,
+                    fit.params["theta_r"].value,
+                    fit.params["theta_n0"].value,
+                ],
+                dtype=float,
+            )
+            y_hat = logistic_3p(t, theta_hat)
+            y_hat_log = np.log(np.clip(y_hat, 1e-12, None))
+            resid = y_log - y_hat_log
+            rss = float(np.nansum(resid**2))
+            if not np.isfinite(rss):
+                continue
+            n_successful += 1
+            if rss < best_rss:
+                best_fit = fit
+                best_y_hat = y_hat
+                best_rss = rss
+        except Exception:
+            # Try-like behavior: skip failed starts and continue searching.
+            continue
+
+    if best_fit is None:
+        raise RuntimeError("All multi-start LM fits failed.")
+
+    return best_fit, best_y_hat, best_rss, n_successful
 
 
 def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
@@ -74,20 +174,21 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
     t_raw = logged_df["Time"].to_numpy(dtype=float)
     y_raw = logged_df["log_PopBio"].to_numpy(dtype=float)
 
-    if len(y) < poly_degree + 1:
+    if len(y) < 3:
         raise ValueError(
             f"Not enough samples in logged dataset at Temp={temp_df['Temp'].iloc[0]}: "
-            f"need >= {poly_degree + 1}, got {len(y)}"
+            f"need >= 3, got {len(y)}"
         )
 
-    coeffs = np.polyfit(t, y, deg=poly_degree)
-    model = np.poly1d(coeffs)
-    y_hat = model(t)
-    resid = y - y_hat
+    rng = np.random.default_rng(seed + int(logged_df["Temp"].iloc[0]))
+    fit, y_hat, rss, n_successful = fit_with_multistart(
+        t, y, logistic_fit_n_starts, rng
+    )
 
+    y_hat_log = np.log(np.clip(y_hat, 1e-12, None))
+    resid = y - y_hat_log
     n = len(y)
-    k = poly_degree + 1
-    rss = float(np.sum(resid**2))
+    k = 3
     tss = float(np.sum((y - np.mean(y)) ** 2))
     r2 = 1.0 - rss / tss if tss > 0 else np.nan
     rmse = float(np.sqrt(rss / n))
@@ -97,27 +198,38 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
     aic = 2 * k - 2 * loglik
     bic = np.log(n) * k - 2 * loglik
 
+    theta_hat = np.array(
+        [
+            fit.params["theta_k"].value,
+            fit.params["theta_r"].value,
+            fit.params["theta_n0"].value,
+        ],
+        dtype=float,
+    )
+    params = np.exp(theta_hat)
     return {
         "temp": float(temp_df["Temp"].iloc[0]),
         "n_rows_raw": int(len(logged_df)),
         "n_rows": n,
         "n_rows_removed_after_log_filter": 0,
-        "poly_degree": int(poly_degree),
+        "n_starts": int(logistic_fit_n_starts),
+        "n_successful_starts": int(n_successful),
+        "K": float(params[0]),
+        "r": float(params[1]),
+        "N0": float(params[2]),
         "RSS": rss,
         "R2": float(r2),
         "RMSE": rmse,
         "MAE": mae,
         "AIC": float(aic),
         "BIC": float(bic),
-        "coeff_a": float(coeffs[0]),
-        "coeff_b": float(coeffs[1]),
-        "coeff_c": float(coeffs[2]),
-        "coeff_d": float(coeffs[3]),
+        "success": bool(fit.success),
+        "message": str(fit.message),
         "t": t,
         "y": y,
         "t_raw": t_raw,
         "y_raw": y_raw,
-        "y_hat": y_hat,
+        "y_hat": y_hat_log,
     }
 
 
@@ -131,12 +243,12 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.figure(figsize=(7, 4.5))
     plt.scatter(t_raw, y_raw, s=18, alpha=0.55, color=color, label="Observed data")
     plt.plot(t_raw, y_hat, linewidth=2.0, color=color, label="Fit line")
-    plt.title(f"OLS model fit at {temp:g} C")
+    plt.title(f"Logistic model fit at {temp:g} C")
     plt.xlabel("Time (Hours)")
     plt.ylabel("ln(population abundance, N)")
     plt.legend(loc="lower right")
     plt.tight_layout()
-    plt.savefig(out_dir / f"ols_fit_temp{int(temp)}.svg")
+    plt.savefig(out_dir / f"logistic_fit_temp{int(temp)}.svg")
     plt.close()
 
 
@@ -164,12 +276,12 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
             label=f"Fit line ({temp:g} C)",
         )
 
-    plt.title("OLS model fits across temperatures")
+    plt.title("Logistic model fits across temperatures")
     plt.xlabel("Time (Hours)")
     plt.ylabel("ln(population abundance, N)")
     plt.legend(fontsize=8, ncol=2, loc="lower right")
     plt.tight_layout()
-    out_path = out_dir / "ols_fit_all_temps.svg"
+    out_path = out_dir / "logistic_fit_all_temps.svg"
     plt.savefig(out_path)
     plt.close()
     return out_path
@@ -179,7 +291,6 @@ def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFr
     out_dir.mkdir(parents=True, exist_ok=True)
     fit_rows = []
     fit_results = []
-
     for temp in sorted(subset["Temp"].unique().tolist()):
         temp_df = subset[subset["Temp"] == temp].copy()
         fit_result = fit_single_temperature(temp_df)
@@ -193,32 +304,37 @@ def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFr
                 "n_rows_removed_after_log_filter": fit_result[
                     "n_rows_removed_after_log_filter"
                 ],
-                "poly_degree": fit_result["poly_degree"],
+                "n_starts": fit_result["n_starts"],
+                "n_successful_starts": fit_result["n_successful_starts"],
+                "K": fit_result["K"],
+                "r": fit_result["r"],
+                "N0": fit_result["N0"],
                 "RSS": fit_result["RSS"],
                 "R2": fit_result["R2"],
                 "RMSE": fit_result["RMSE"],
                 "MAE": fit_result["MAE"],
                 "AIC": fit_result["AIC"],
                 "BIC": fit_result["BIC"],
-                "coeff_a": fit_result["coeff_a"],
-                "coeff_b": fit_result["coeff_b"],
-                "coeff_c": fit_result["coeff_c"],
-                "coeff_d": fit_result["coeff_d"],
+                "success": fit_result["success"],
+                "message": fit_result["message"],
             }
         )
-
     fit_table = pd.DataFrame(fit_rows).sort_values(by="Temp").reset_index(drop=True)
     return fit_table, fit_results
 
 
 def print_fit_summary(fit_table: pd.DataFrame) -> None:
-    print("\nTemperature-wise OLS fit summary on ln(PopBio) (cubic polynomial):")
+    print(
+        "\nTemperature-wise logistic fit summary on ln(PopBio) "
+        "(logistic 3-parameter):"
+    )
     for _, row in fit_table.iterrows():
         print(
             f"Temp={row['Temp']:g} | n_rows_raw={int(row['n_rows_raw'])} | "
             f"n_rows_used={int(row['n_rows'])} | removed={int(row['n_rows_removed_after_log_filter'])} | "
+            f"starts={int(row['n_starts'])} | start_success={int(row['n_successful_starts'])} | "
             f"R2={row['R2']:.4f} | RMSE={row['RMSE']:.4f} | MAE={row['MAE']:.4f} | "
-            f"AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f}"
+            f"AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f} | success={row['success']}"
         )
 
 
