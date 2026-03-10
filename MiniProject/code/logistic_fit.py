@@ -21,9 +21,7 @@ root_path = find_root(Path(__file__))
 data_path = Path("MiniProject") / "data" / "tetraselmis_tetrahele_log.csv"
 data_path = root_path / data_path
 result_dir = root_path / "MiniProject" / "result" / "logistic_fit"
-
-logistic_fit_n_starts = 50
-seed = 0
+logistic_fixed_start_count = 12
 
 print(f"root path: {root_path}")
 print(f"data path: {data_path}")
@@ -100,6 +98,35 @@ def initial_theta(t: np.ndarray, y_log: np.ndarray) -> np.ndarray:
     return np.log([k_guess, r_guess, n0_guess])
 
 
+def build_fixed_initial_thetas(t: np.ndarray, y_log: np.ndarray) -> list[np.ndarray]:
+    base_k, base_r, base_n0 = np.exp(initial_theta(t, y_log))
+    fixed_start_specs = [
+        (0.85, 0.30, 0.70),
+        (0.85, 1.00, 1.00),
+        (0.85, 2.50, 1.35),
+        (1.00, 0.30, 0.70),
+        (1.00, 0.60, 0.90),
+        (1.00, 1.00, 1.00),
+        (1.00, 1.80, 1.20),
+        (1.00, 2.50, 1.35),
+        (1.20, 0.30, 0.70),
+        (1.20, 1.00, 1.00),
+        (1.20, 1.80, 1.20),
+        (1.40, 2.50, 1.35),
+    ]
+
+    theta_candidates = []
+    for k_scale, r_scale, n0_scale in fixed_start_specs:
+        k0 = max(base_k * k_scale, 1e-8)
+        r0 = max(base_r * r_scale, 1e-8)
+        n00 = max(base_n0 * n0_scale, 1e-8)
+        if k0 <= n00:
+            k0 = max(n00 * 1.2, 1e-8)
+        theta_candidates.append(np.log([k0, r0, n00]))
+
+    return theta_candidates
+
+
 def prepare_logged_temp_data(temp_df: pd.DataFrame) -> pd.DataFrame:
     return (
         temp_df[["Time", "log_PopBio", "Temp"]]
@@ -109,18 +136,51 @@ def prepare_logged_temp_data(temp_df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def fit_with_multistart(
-    t: np.ndarray, y_log: np.ndarray, n_starts: int, rng: np.random.Generator
-) -> tuple:
-    base_theta = initial_theta(t, y_log)
-    theta_candidates = [base_theta]
-    for _ in range(n_starts - 1):
-        noise = rng.normal(loc=0.0, scale=[0.35, 0.8, 0.35], size=3)
-        theta_candidates.append(base_theta + noise)
+def compute_fit_metrics(y_log: np.ndarray, y_hat_log: np.ndarray) -> dict:
+    resid = y_log - y_hat_log
+    rss = float(np.nansum(resid**2))
+    n = len(y_log)
+    k = 3
+    tss = float(np.sum((y_log - np.mean(y_log)) ** 2))
+    r2 = 1.0 - rss / tss if tss > 0 else np.nan
+    rmse = float(np.sqrt(rss / n))
+    mae = float(np.mean(np.abs(resid)))
+    rss_safe = max(rss, 1e-12)
+    loglik = -0.5 * n * (np.log(2 * np.pi) + 1 + np.log(rss_safe / n))
+    aic = 2 * k - 2 * loglik
+    bic = np.log(n) * k - 2 * loglik
+    return {
+        "RSS": rss,
+        "R2": float(r2),
+        "RMSE": rmse,
+        "MAE": mae,
+        "AIC": float(aic),
+        "BIC": float(bic),
+    }
 
-    best_fit = None
-    best_y_hat = None
-    best_rss = np.inf
+
+def is_better_candidate(candidate: dict, current_best: dict | None) -> bool:
+    if current_best is None:
+        return True
+
+    candidate_value = candidate["AIC"]
+    best_value = current_best["AIC"]
+    if not np.isfinite(candidate_value):
+        return False
+    if not np.isfinite(best_value):
+        return True
+
+    if candidate_value < best_value:
+        return True
+    if candidate_value > best_value:
+        return False
+
+    return candidate["RSS"] < current_best["RSS"]
+
+
+def fit_with_fixed_starts(t: np.ndarray, y_log: np.ndarray) -> tuple:
+    theta_candidates = build_fixed_initial_thetas(t, y_log)
+    best_record = None
     n_successful = 0
 
     for theta0 in theta_candidates:
@@ -147,23 +207,26 @@ def fit_with_multistart(
             )
             y_hat = logistic_3p(t, theta_hat)
             y_hat_log = np.log(np.clip(y_hat, 1e-12, None))
-            resid = y_log - y_hat_log
-            rss = float(np.nansum(resid**2))
-            if not np.isfinite(rss):
+            fit_metrics = compute_fit_metrics(y_log, y_hat_log)
+            if not np.isfinite(fit_metrics["RSS"]):
                 continue
+            record = {
+                "success": bool(fit.success),
+                "message": str(fit.message),
+                "fit": fit,
+                "y_hat_log": y_hat_log,
+                **fit_metrics,
+            }
             n_successful += 1
-            if rss < best_rss:
-                best_fit = fit
-                best_y_hat = y_hat
-                best_rss = rss
+            if is_better_candidate(record, best_record):
+                best_record = record
         except Exception:
-            # Try-like behavior: skip failed starts and continue searching.
             continue
 
-    if best_fit is None:
+    if best_record is None:
         raise RuntimeError("All multi-start LM fits failed.")
 
-    return best_fit, best_y_hat, best_rss, n_successful
+    return best_record, n_successful
 
 
 def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
@@ -180,23 +243,9 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
             f"need >= 3, got {len(y)}"
         )
 
-    rng = np.random.default_rng(seed + int(logged_df["Temp"].iloc[0]))
-    fit, y_hat, rss, n_successful = fit_with_multistart(
-        t, y, logistic_fit_n_starts, rng
-    )
-
-    y_hat_log = np.log(np.clip(y_hat, 1e-12, None))
-    resid = y - y_hat_log
+    best_record, n_successful = fit_with_fixed_starts(t, y)
+    fit = best_record["fit"]
     n = len(y)
-    k = 3
-    tss = float(np.sum((y - np.mean(y)) ** 2))
-    r2 = 1.0 - rss / tss if tss > 0 else np.nan
-    rmse = float(np.sqrt(rss / n))
-    mae = float(np.mean(np.abs(resid)))
-    rss_safe = max(rss, 1e-12)
-    loglik = -0.5 * n * (np.log(2 * np.pi) + 1 + np.log(rss_safe / n))
-    aic = 2 * k - 2 * loglik
-    bic = np.log(n) * k - 2 * loglik
 
     theta_hat = np.array(
         [
@@ -212,24 +261,25 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
         "n_rows_raw": int(len(logged_df)),
         "n_rows": n,
         "n_rows_removed_after_log_filter": 0,
-        "n_starts": int(logistic_fit_n_starts),
+        "selection_metric": "AIC",
+        "n_starts": int(logistic_fixed_start_count),
         "n_successful_starts": int(n_successful),
         "K": float(params[0]),
         "r": float(params[1]),
         "N0": float(params[2]),
-        "RSS": rss,
-        "R2": float(r2),
-        "RMSE": rmse,
-        "MAE": mae,
-        "AIC": float(aic),
-        "BIC": float(bic),
+        "RSS": float(best_record["RSS"]),
+        "R2": float(best_record["R2"]),
+        "RMSE": float(best_record["RMSE"]),
+        "MAE": float(best_record["MAE"]),
+        "AIC": float(best_record["AIC"]),
+        "BIC": float(best_record["BIC"]),
         "success": bool(fit.success),
         "message": str(fit.message),
         "t": t,
         "y": y,
         "t_raw": t_raw,
         "y_raw": y_raw,
-        "y_hat": y_hat_log,
+        "y_hat": best_record["y_hat_log"],
     }
 
 
@@ -287,7 +337,9 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
     return out_path
 
 
-def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFrame, list]:
+def fit_all_temperatures(
+    subset: pd.DataFrame, out_dir: Path
+) -> tuple[pd.DataFrame, list]:
     out_dir.mkdir(parents=True, exist_ok=True)
     fit_rows = []
     fit_results = []
@@ -304,6 +356,7 @@ def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFr
                 "n_rows_removed_after_log_filter": fit_result[
                     "n_rows_removed_after_log_filter"
                 ],
+                "selection_metric": fit_result["selection_metric"],
                 "n_starts": fit_result["n_starts"],
                 "n_successful_starts": fit_result["n_successful_starts"],
                 "K": fit_result["K"],
@@ -332,7 +385,8 @@ def print_fit_summary(fit_table: pd.DataFrame) -> None:
         print(
             f"Temp={row['Temp']:g} | n_rows_raw={int(row['n_rows_raw'])} | "
             f"n_rows_used={int(row['n_rows'])} | removed={int(row['n_rows_removed_after_log_filter'])} | "
-            f"starts={int(row['n_starts'])} | start_success={int(row['n_successful_starts'])} | "
+            f"select_by={row['selection_metric']} | starts={int(row['n_starts'])} | "
+            f"start_success={int(row['n_successful_starts'])} | "
             f"R2={row['R2']:.4f} | RMSE={row['RMSE']:.4f} | MAE={row['MAE']:.4f} | "
             f"AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f} | success={row['success']}"
         )

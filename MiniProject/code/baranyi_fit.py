@@ -23,8 +23,7 @@ data_path = Path("MiniProject") / "data" / "tetraselmis_tetrahele_log.csv"
 data_path = root_path / data_path
 result_dir = root_path / "MiniProject" / "result" / "baranyi_fit"
 
-baranyi_fit_n_starts = 80
-seed = 0
+baranyi_fixed_start_count = 16
 
 print(f"root path: {root_path}")
 print(f"data path: {data_path}")
@@ -136,18 +135,77 @@ def initial_theta(t: np.ndarray, y_log: np.ndarray) -> np.ndarray:
     )
 
 
-def fit_with_multistart(
-    t: np.ndarray, y_log: np.ndarray, n_starts: int, rng: np.random.Generator
-) -> tuple:
+def build_fixed_initial_thetas(t: np.ndarray, y_log: np.ndarray) -> list[np.ndarray]:
     base_theta = initial_theta(t, y_log)
-    theta_candidates = [base_theta]
-    for _ in range(n_starts - 1):
-        noise = rng.normal(loc=0.0, scale=[0.25, 0.45, 0.65, 0.75], size=4)
-        theta_candidates.append(base_theta + noise)
+    base_y0 = float(base_theta[0])
+    base_delta_y = float(np.exp(base_theta[1]))
+    base_mu = float(np.exp(base_theta[2]))
+    base_lag = float(np.exp(base_theta[3]))
+
+    fixed_start_specs = [
+        (-0.20, 0.70, 0.50, 0.50),
+        (-0.20, 0.70, 1.00, 1.00),
+        (-0.20, 1.00, 1.80, 1.80),
+        (-0.20, 1.30, 2.50, 2.50),
+        (0.00, 0.70, 0.50, 1.00),
+        (0.00, 1.00, 1.00, 0.50),
+        (0.00, 1.00, 1.00, 1.00),
+        (0.00, 1.00, 1.80, 1.80),
+        (0.00, 1.30, 2.50, 2.50),
+        (0.20, 0.70, 0.50, 1.80),
+        (0.20, 1.00, 1.00, 1.80),
+        (0.20, 1.30, 1.80, 0.50),
+        (0.20, 1.30, 2.50, 1.00),
+        (0.35, 0.70, 1.80, 2.50),
+        (0.35, 1.00, 2.50, 0.50),
+        (0.35, 1.30, 2.50, 2.50),
+    ]
+
+    theta_candidates = []
+    for y0_shift, delta_y_scale, mu_scale, lag_scale in fixed_start_specs:
+        y0_0 = base_y0 + y0_shift
+        delta_y_0 = max(base_delta_y * delta_y_scale, 1e-8)
+        mu_0 = max(base_mu * mu_scale, 1e-8)
+        lag_0 = max(base_lag * lag_scale, 1e-8)
+        theta_candidates.append(
+            np.array(
+                [y0_0, np.log(delta_y_0), np.log(mu_0), np.log(lag_0)],
+                dtype=float,
+            )
+        )
+
+    return theta_candidates
+
+
+def compute_fit_metrics(y_log: np.ndarray, y_hat: np.ndarray) -> dict:
+    resid = y_log - y_hat
+    rss = float(np.nansum(resid**2))
+    n = len(y_log)
+    k = 4
+    tss = float(np.sum((y_log - np.mean(y_log)) ** 2))
+    r2 = 1.0 - rss / tss if tss > 0 else np.nan
+    rmse = float(np.sqrt(rss / n))
+    mae = float(np.mean(np.abs(resid)))
+    rss_safe = max(rss, 1e-12)
+    loglik = -0.5 * n * (np.log(2 * np.pi) + 1 + np.log(rss_safe / n))
+    aic = 2 * k - 2 * loglik
+    bic = np.log(n) * k - 2 * loglik
+    return {
+        "RSS": rss,
+        "R2": float(r2),
+        "RMSE": rmse,
+        "MAE": mae,
+        "AIC": float(aic),
+        "BIC": float(bic),
+    }
+
+
+def fit_with_fixed_starts(t: np.ndarray, y_log: np.ndarray) -> tuple:
+    theta_candidates = build_fixed_initial_thetas(t, y_log)
 
     best_fit = None
     best_theta = None
-    best_rss = np.inf
+    best_metrics = None
     n_successful = 0
 
     for theta0 in theta_candidates:
@@ -174,22 +232,29 @@ def fit_with_multistart(
                 ],
                 dtype=float,
             )
-            resid = residuals(theta_hat, t, y_log)
-            rss = float(np.nansum(resid**2))
-            if not np.isfinite(rss):
+            y_hat = baranyi_log_model(t, theta_hat)
+            fit_metrics = compute_fit_metrics(y_log, y_hat)
+            if not np.isfinite(fit_metrics["RSS"]):
                 continue
             n_successful += 1
-            if rss < best_rss:
+            if (
+                best_metrics is None
+                or fit_metrics["AIC"] < best_metrics["AIC"]
+                or (
+                    np.isclose(fit_metrics["AIC"], best_metrics["AIC"])
+                    and fit_metrics["RSS"] < best_metrics["RSS"]
+                )
+            ):
                 best_fit = fit
                 best_theta = theta_hat
-                best_rss = rss
+                best_metrics = fit_metrics
         except Exception:
             continue
 
-    if best_fit is None or best_theta is None:
+    if best_fit is None or best_theta is None or best_metrics is None:
         raise RuntimeError("All multi-start Baranyi fits failed.")
 
-    return best_fit, best_theta, best_rss, n_successful
+    return best_fit, best_theta, best_metrics, n_successful
 
 
 def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
@@ -206,26 +271,13 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
             f"need >= 4, got {len(y)}"
         )
 
-    rng = np.random.default_rng(seed + int(logged_df["Temp"].iloc[0]))
-    fit, theta_hat, rss, n_successful = fit_with_multistart(
-        t, y, baranyi_fit_n_starts, rng
-    )
+    fit, theta_hat, fit_metrics, n_successful = fit_with_fixed_starts(t, y)
 
     y_hat = baranyi_log_model(t, theta_hat)
     t_grid = np.linspace(float(np.min(t_raw)), float(np.max(t_raw)), 400)
     y_hat_grid = baranyi_log_model(t_grid, theta_hat)
-    resid = y - y_hat
 
     n = len(y)
-    k = 4
-    tss = float(np.sum((y - np.mean(y)) ** 2))
-    r2 = 1.0 - rss / tss if tss > 0 else np.nan
-    rmse = float(np.sqrt(rss / n))
-    mae = float(np.mean(np.abs(resid)))
-    rss_safe = max(rss, 1e-12)
-    loglik = -0.5 * n * (np.log(2 * np.pi) + 1 + np.log(rss_safe / n))
-    aic = 2 * k - 2 * loglik
-    bic = np.log(n) * k - 2 * loglik
 
     y0, ymax, mu, lag = unpack_theta(theta_hat)
     return {
@@ -233,18 +285,19 @@ def fit_single_temperature(temp_df: pd.DataFrame) -> dict:
         "n_rows_raw": int(len(logged_df)),
         "n_rows": n,
         "n_rows_removed_after_log_filter": 0,
-        "n_starts": int(baranyi_fit_n_starts),
+        "selection_metric": "AIC",
+        "n_starts": int(baranyi_fixed_start_count),
         "n_successful_starts": int(n_successful),
         "N0": float(y0),
         "NMAX": float(ymax),
         "mumax": float(mu),
         "lag": float(lag),
-        "RSS": rss,
-        "R2": float(r2),
-        "RMSE": rmse,
-        "MAE": mae,
-        "AIC": float(aic),
-        "BIC": float(bic),
+        "RSS": float(fit_metrics["RSS"]),
+        "R2": float(fit_metrics["R2"]),
+        "RMSE": float(fit_metrics["RMSE"]),
+        "MAE": float(fit_metrics["MAE"]),
+        "AIC": float(fit_metrics["AIC"]),
+        "BIC": float(fit_metrics["BIC"]),
         "success": bool(fit.success),
         "message": str(fit.message),
         "t": t,
@@ -330,6 +383,7 @@ def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFr
                 "n_rows_removed_after_log_filter": fit_result[
                     "n_rows_removed_after_log_filter"
                 ],
+                "selection_metric": fit_result["selection_metric"],
                 "n_starts": fit_result["n_starts"],
                 "n_successful_starts": fit_result["n_successful_starts"],
                 "N0": fit_result["N0"],
@@ -356,7 +410,8 @@ def print_fit_summary(fit_table: pd.DataFrame) -> None:
         print(
             f"Temp={row['Temp']:g} | n_rows_raw={int(row['n_rows_raw'])} | "
             f"n_rows_used={int(row['n_rows'])} | removed={int(row['n_rows_removed_after_log_filter'])} | "
-            f"starts={int(row['n_starts'])} | start_success={int(row['n_successful_starts'])} | "
+            f"select_by={row['selection_metric']} | starts={int(row['n_starts'])} | "
+            f"start_success={int(row['n_successful_starts'])} | "
             f"N0={row['N0']:.4f} | NMAX={row['NMAX']:.4f} | "
             f"mumax={row['mumax']:.4f} | lag={row['lag']:.4f} | "
             f"R2={row['R2']:.4f} | RMSE={row['RMSE']:.4f} | MAE={row['MAE']:.4f} | "
