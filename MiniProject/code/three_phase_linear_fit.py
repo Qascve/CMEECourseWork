@@ -336,7 +336,7 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.ylabel("Population abundance(N)")
     plt.legend(loc="lower right")
     plt.tight_layout()
-    plt.savefig(out_dir / f"three_phase_fit_temp{int(temp)}.svg")
+    plt.savefig(out_dir / f"three_phase_fit_temp{int(temp)}.pdf")
     plt.close()
 
 
@@ -370,7 +370,7 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
     plt.ylabel("Population abundance(N)")
     plt.legend(fontsize=8, ncol=2, loc="lower right")
     plt.tight_layout()
-    out_path = out_dir / "three_phase_fit_all_temps.svg"
+    out_path = out_dir / "three_phase_fit_all_temps.pdf"
     plt.savefig(out_path)
     plt.close()
     return out_path

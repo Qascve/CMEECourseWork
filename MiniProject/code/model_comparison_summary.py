@@ -40,6 +40,48 @@ def load_logged_subset(csv_path: Path) -> pd.DataFrame:
     return subset.sort_values(by=["Temp", "Time"]).reset_index(drop=True)
 
 
+def save_three_temperature_scatter_distribution(
+    subset: pd.DataFrame, out_dir: Path
+) -> Path:
+    target_temps = [8.0, 16.0, 25.0]
+    dist_df = subset[subset["Temp"].isin(target_temps)].copy()
+    if dist_df.empty:
+        raise ValueError("No data found for 8, 16, 25 °C.")
+
+    summary_table = dist_df.groupby("Temp")["log_PopBio"].agg(["count", "mean"]).reset_index()
+
+    print("\nObserved data summary at three temperatures:")
+    for _, row in summary_table.sort_values(by="Temp").iterrows():
+        print(
+            f"Temp={row['Temp']:g} °C | n={int(row['count'])} | "
+            f"mean(log_PopBio)={row['mean']:.4f}"
+        )
+
+    plt.figure(figsize=(8, 5))
+    color_map = {8.0: "tab:blue", 16.0: "tab:orange", 25.0: "tab:green"}
+    for temp in target_temps:
+        temp_df = dist_df[dist_df["Temp"] == temp]
+        plt.scatter(
+            temp_df["Time"],
+            temp_df["log_PopBio"],
+            s=24,
+            alpha=0.65,
+            color=color_map[temp],
+            label=f"Observed data ({int(temp)} °C)",
+        )
+
+    plt.title("Observed data across temperatures")
+    plt.xlabel("Time (Hours)")
+    plt.ylabel("Population abundance(N)")
+    plt.legend(loc="lower right")
+    plt.tight_layout()
+
+    out_path = out_dir / "three_temperature_distribution.pdf"
+    plt.savefig(out_path)
+    plt.close()
+    return out_path
+
+
 def import_model_modules() -> dict[str, object]:
     module_map = {
         "Logistic": "logistic_fit",
@@ -125,7 +167,7 @@ def save_model_comparison_plot(
     plt.legend(loc="lower left")
     plt.tight_layout()
 
-    out_path = out_dir / f"model_comparison_temp{int(selected_temp)}.svg"
+    out_path = out_dir / f"model_comparison_temp{int(selected_temp)}.pdf"
     plt.savefig(out_path)
     plt.close()
     return out_path
@@ -166,6 +208,8 @@ def main() -> None:
     print(f"selected temperature: {selected_temp:g} °C")
 
     subset = load_logged_subset(data_path)
+    distribution_plot_path = save_three_temperature_scatter_distribution(subset, result_dir)
+
     modules = import_model_modules()
     fit_results, observed_df = fit_models_at_temperature(modules, subset, selected_temp)
     metrics_table = build_metrics_summary_table(fit_results, selected_temp)
@@ -176,6 +220,7 @@ def main() -> None:
     metrics_table.to_csv(result_dir / "model_metrics_at_selected_temp.csv", index=False)
 
     print_metrics_summary(metrics_table)
+    print(f"Saved distribution plot: {distribution_plot_path}")
     print(f"Saved metrics table: {result_dir / 'model_metrics_at_selected_temp.csv'}")
     print(f"Saved comparison plot: {comparison_plot_path}")
 

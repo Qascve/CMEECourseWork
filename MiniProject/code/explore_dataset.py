@@ -142,7 +142,7 @@ def plot_top_groups_summary(top_groups: pd.DataFrame, out_dir: Path) -> Path:
         plt.text(x + max(values) * 0.01, y, f"n_unique_temps={n_temp}", va="center", fontsize=8)
 
     plt.tight_layout()
-    out_path = out_dir / "top_groups_summary.png"
+    out_path = out_dir / "top_groups_summary.pdf"
     plt.savefig(out_path, dpi=300)
     plt.close()
     return out_path
