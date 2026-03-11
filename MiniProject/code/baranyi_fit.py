@@ -323,7 +323,7 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.plot(t_grid, y_hat_grid, linewidth=2.0, color=color, label="Fit line")
     plt.title(f"Baranyi model fit at {temp:g} °C")
     plt.xlabel("Time (Hours)")
-    plt.ylabel("ln(population abundance, N)")
+    plt.ylabel("Population abundance(N)")
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(out_dir / f"baranyi_fit_temp{int(temp)}.svg")
@@ -357,7 +357,7 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
 
     plt.title("Baranyi model fits across temperatures")
     plt.xlabel("Time (Hours)")
-    plt.ylabel("ln(population abundance, N)")
+    plt.ylabel("Population abundance(N)")
     plt.legend(fontsize=8, ncol=2, loc="lower right")
     plt.tight_layout()
     out_path = out_dir / "baranyi_fit_all_temps.svg"
@@ -405,7 +405,7 @@ def fit_all_temperatures(subset: pd.DataFrame, out_dir: Path) -> tuple[pd.DataFr
 
 
 def print_fit_summary(fit_table: pd.DataFrame) -> None:
-    print("\nTemperature-wise Baranyi fit summary on ln(PopBio):")
+    print("\nTemperature-wise Baranyi fit summary on PopBio:")
     for _, row in fit_table.iterrows():
         print(
             f"Temp={row['Temp']:g} | n_rows_raw={int(row['n_rows_raw'])} | "

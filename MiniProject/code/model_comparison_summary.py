@@ -121,7 +121,7 @@ def save_model_comparison_plot(
     )
     plt.title(f"Model comparison at {selected_temp:g} °C")
     plt.xlabel("Time (Hours)")
-    plt.ylabel("ln(population abundance, N)")
+    plt.ylabel("Population abundance(N)")
     plt.legend(loc="lower left")
     plt.tight_layout()
 

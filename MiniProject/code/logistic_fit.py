@@ -21,7 +21,7 @@ root_path = find_root(Path(__file__))
 data_path = Path("MiniProject") / "data" / "tetraselmis_tetrahele_log.csv"
 data_path = root_path / data_path
 result_dir = root_path / "MiniProject" / "result" / "logistic_fit"
-logistic_fixed_start_count = 12
+logistic_fixed_start_count = 16
 
 print(f"root path: {root_path}")
 print(f"data path: {data_path}")
@@ -103,6 +103,7 @@ def build_fixed_initial_thetas(t: np.ndarray, y_log: np.ndarray) -> list[np.ndar
     fixed_start_specs = [
         (0.85, 0.30, 0.70),
         (0.85, 1.00, 1.00),
+        (0.85, 1.80, 1.20),
         (0.85, 2.50, 1.35),
         (1.00, 0.30, 0.70),
         (1.00, 0.60, 0.90),
@@ -110,8 +111,11 @@ def build_fixed_initial_thetas(t: np.ndarray, y_log: np.ndarray) -> list[np.ndar
         (1.00, 1.80, 1.20),
         (1.00, 2.50, 1.35),
         (1.20, 0.30, 0.70),
+        (1.20, 0.60, 0.90),
         (1.20, 1.00, 1.00),
         (1.20, 1.80, 1.20),
+        (1.40, 1.00, 1.00),
+        (1.40, 1.80, 1.20),
         (1.40, 2.50, 1.35),
     ]
 
@@ -295,7 +299,7 @@ def save_fit_plot(fit_result: dict, out_dir: Path) -> None:
     plt.plot(t_raw, y_hat, linewidth=2.0, color=color, label="Fit line")
     plt.title(f"Logistic model fit at {temp:g} °C")
     plt.xlabel("Time (Hours)")
-    plt.ylabel("ln(population abundance, N)")
+    plt.ylabel("Population abundance(N)")
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(out_dir / f"logistic_fit_temp{int(temp)}.svg")
@@ -328,7 +332,7 @@ def save_combined_temperature_plot(fit_results: list, out_dir: Path) -> Path:
 
     plt.title("Logistic model fits across temperatures")
     plt.xlabel("Time (Hours)")
-    plt.ylabel("ln(population abundance, N)")
+    plt.ylabel("Population abundance(N)")
     plt.legend(fontsize=8, ncol=2, loc="lower right")
     plt.tight_layout()
     out_path = out_dir / "logistic_fit_all_temps.svg"
@@ -378,7 +382,7 @@ def fit_all_temperatures(
 
 def print_fit_summary(fit_table: pd.DataFrame) -> None:
     print(
-        "\nTemperature-wise logistic fit summary on ln(PopBio) "
+        "\nTemperature-wise logistic fit summary on PopBio:"
         "(logistic 3-parameter):"
     )
     for _, row in fit_table.iterrows():
