@@ -24,7 +24,7 @@ def find_root(start_path: Path) -> Path:
 root_path = find_root(Path(__file__))
 data_path = root_path / "MiniProject" / "data" / "tetraselmis_tetrahele_log.csv"
 result_dir = root_path / "MiniProject" / "result" / "model_comparison_summary"
-selected_temp = 8
+selected_temps = [8.0, 16.0, 25.0]
 
 
 def load_logged_subset(csv_path: Path) -> pd.DataFrame:
@@ -119,6 +119,50 @@ def logistic_curve_from_fit(fit_result: dict, t_grid: np.ndarray) -> np.ndarray:
     return np.log(np.clip(k / denom, 1e-12, None))
 
 
+def baranyi_curve_from_fit(fit_result: dict, t_grid: np.ndarray) -> np.ndarray:
+    y0 = float(fit_result["N0"])
+    ymax = float(fit_result["NMAX"])
+    mu = float(fit_result["mumax"])
+    lag = float(fit_result["lag"])
+    h0 = mu * lag
+    exp_neg_mut = np.exp(np.clip(-mu * t_grid, -700, 700))
+    exp_neg_h0 = np.exp(np.clip(-h0, -700, 700))
+    adjustment_core = exp_neg_mut + exp_neg_h0 - np.exp(np.clip(-mu * t_grid - h0, -700, 700))
+    adjustment_core = np.clip(adjustment_core, 1e-12, None)
+    at = t_grid + np.log(adjustment_core) / max(mu, 1e-12)
+    exp_mu_at = np.exp(np.clip(mu * at, -700, 700))
+    exp_capacity = np.exp(np.clip(ymax - y0, -700, 700))
+    denom = 1.0 + (exp_mu_at - 1.0) / max(exp_capacity, 1e-12)
+    denom = np.clip(denom, 1e-12, None)
+    return y0 + mu * at - np.log(denom)
+
+
+def three_phase_curve_from_fit(fit_result: dict, t_grid: np.ndarray) -> np.ndarray:
+    n0 = float(fit_result["N0"])
+    nmax = float(fit_result["NMAX"])
+    tlag = float(fit_result["tLAG"])
+    tmax = float(fit_result["tMAX"])
+    duration = max(tmax - tlag, 1e-12)
+    mu = (nmax - n0) / duration
+    growth = n0 + mu * (t_grid - tlag)
+    return np.where(t_grid <= tlag, n0, np.where(t_grid >= tmax, nmax, growth))
+
+
+def average_slope_in_window(model_name: str, fit_result: dict, start: float, end: float) -> float:
+    if end <= start:
+        return float("nan")
+    t_eval = np.array([start, end], dtype=float)
+    if model_name == "Logistic":
+        y_eval = logistic_curve_from_fit(fit_result, t_eval)
+    elif model_name == "Baranyi":
+        y_eval = baranyi_curve_from_fit(fit_result, t_eval)
+    elif model_name == "Three-phase linear":
+        y_eval = three_phase_curve_from_fit(fit_result, t_eval)
+    else:
+        return float("nan")
+    return float((y_eval[1] - y_eval[0]) / (end - start))
+
+
 def save_model_comparison_plot(
     fit_results: dict[str, dict], observed_df: pd.DataFrame, selected_temp: float, out_dir: Path
 ) -> Path:
@@ -164,7 +208,7 @@ def save_model_comparison_plot(
     plt.title(f"Model comparison at {selected_temp:g} °C")
     plt.xlabel("Time (Hours)")
     plt.ylabel("Population abundance(N)")
-    plt.legend(loc="lower left")
+    plt.legend(loc="lower right")
     plt.tight_layout()
 
     out_path = out_dir / f"model_comparison_temp{int(selected_temp)}.pdf"
@@ -176,6 +220,12 @@ def save_model_comparison_plot(
 def build_metrics_summary_table(fit_results: dict[str, dict], selected_temp: float) -> pd.DataFrame:
     summary_rows = []
     for model_name, fit_result in fit_results.items():
+        avg_slope_0_600 = average_slope_in_window(model_name, fit_result, 0.0, 600.0)
+        avg_slope_0_300 = (
+            average_slope_in_window(model_name, fit_result, 0.0, 300.0)
+            if float(selected_temp) == 25.0
+            else float("nan")
+        )
         summary_rows.append(
             {
                 "Model": model_name,
@@ -184,6 +234,8 @@ def build_metrics_summary_table(fit_results: dict[str, dict], selected_temp: flo
                 "RMSE": float(fit_result["RMSE"]),
                 "AIC": float(fit_result["AIC"]),
                 "BIC": float(fit_result["BIC"]),
+                "AvgSlope_0_600": avg_slope_0_600,
+                "AvgSlope_0_300": avg_slope_0_300,
             }
         )
 
@@ -195,7 +247,8 @@ def print_metrics_summary(metrics_table: pd.DataFrame) -> None:
     for _, row in metrics_table.iterrows():
         print(
             f"{row['Model']}: Temp={row['Temp']:g} | R2={row['R2']:.4f} | "
-            f"RMSE={row['RMSE']:.4f} | AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f}"
+            f"RMSE={row['RMSE']:.4f} | AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f} | "
+            f"AvgSlope_0_600={row['AvgSlope_0_600']:.6f}"
         )
 
 
@@ -205,24 +258,31 @@ def main() -> None:
     print(f"root path: {root_path}")
     print(f"data path: {data_path}")
     print(f"result dir: {result_dir}")
-    print(f"selected temperature: {selected_temp:g} °C")
+    print(
+        "selected temperatures: "
+        + ", ".join(f"{temp:g}" for temp in selected_temps)
+        + " °C"
+    )
 
     subset = load_logged_subset(data_path)
     distribution_plot_path = save_three_temperature_scatter_distribution(subset, result_dir)
 
     modules = import_model_modules()
-    fit_results, observed_df = fit_models_at_temperature(modules, subset, selected_temp)
-    metrics_table = build_metrics_summary_table(fit_results, selected_temp)
-    comparison_plot_path = save_model_comparison_plot(
-        fit_results, observed_df, selected_temp, result_dir
-    )
+    for selected_temp in selected_temps:
+        fit_results, observed_df = fit_models_at_temperature(modules, subset, selected_temp)
+        metrics_table = build_metrics_summary_table(fit_results, selected_temp)
+        comparison_plot_path = save_model_comparison_plot(
+            fit_results, observed_df, selected_temp, result_dir
+        )
 
-    metrics_table.to_csv(result_dir / "model_metrics_at_selected_temp.csv", index=False)
+        metrics_out_path = result_dir / f"model_metrics_at_temp{int(selected_temp)}.csv"
+        metrics_table.to_csv(metrics_out_path, index=False)
 
-    print_metrics_summary(metrics_table)
+        print_metrics_summary(metrics_table)
+        print(f"Saved metrics table: {metrics_out_path}")
+        print(f"Saved comparison plot: {comparison_plot_path}")
+
     print(f"Saved distribution plot: {distribution_plot_path}")
-    print(f"Saved metrics table: {result_dir / 'model_metrics_at_selected_temp.csv'}")
-    print(f"Saved comparison plot: {comparison_plot_path}")
 
 
 if __name__ == "__main__":
