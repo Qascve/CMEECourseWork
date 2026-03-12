@@ -24,7 +24,8 @@ pipeline_steps = [
     ("Run logistic model fit", code_dir / "logistic_fit.py"),
     ("Run Baranyi model fit", code_dir / "baranyi_fit.py"),
     ("Run three-phase linear model fit", code_dir / "three_phase_linear_fit.py"),
-    ("Summarize model comparison at 8 °C", code_dir / "model_comparison_summary.py"),
+    ("Summarize model comparison", code_dir / "model_comparison_summary.py"),
+    ("Compile LaTeX report", code_dir / "compile_report.py"),
 ]
 
 

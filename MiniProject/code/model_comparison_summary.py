@@ -148,21 +148,6 @@ def three_phase_curve_from_fit(fit_result: dict, t_grid: np.ndarray) -> np.ndarr
     return np.where(t_grid <= tlag, n0, np.where(t_grid >= tmax, nmax, growth))
 
 
-def average_slope_in_window(model_name: str, fit_result: dict, start: float, end: float) -> float:
-    if end <= start:
-        return float("nan")
-    t_eval = np.array([start, end], dtype=float)
-    if model_name == "Logistic":
-        y_eval = logistic_curve_from_fit(fit_result, t_eval)
-    elif model_name == "Baranyi":
-        y_eval = baranyi_curve_from_fit(fit_result, t_eval)
-    elif model_name == "Three-phase linear":
-        y_eval = three_phase_curve_from_fit(fit_result, t_eval)
-    else:
-        return float("nan")
-    return float((y_eval[1] - y_eval[0]) / (end - start))
-
-
 def save_model_comparison_plot(
     fit_results: dict[str, dict], observed_df: pd.DataFrame, selected_temp: float, out_dir: Path
 ) -> Path:
@@ -220,12 +205,6 @@ def save_model_comparison_plot(
 def build_metrics_summary_table(fit_results: dict[str, dict], selected_temp: float) -> pd.DataFrame:
     summary_rows = []
     for model_name, fit_result in fit_results.items():
-        avg_slope_0_600 = average_slope_in_window(model_name, fit_result, 0.0, 600.0)
-        avg_slope_0_300 = (
-            average_slope_in_window(model_name, fit_result, 0.0, 300.0)
-            if float(selected_temp) == 25.0
-            else float("nan")
-        )
         summary_rows.append(
             {
                 "Model": model_name,
@@ -234,8 +213,6 @@ def build_metrics_summary_table(fit_results: dict[str, dict], selected_temp: flo
                 "RMSE": float(fit_result["RMSE"]),
                 "AIC": float(fit_result["AIC"]),
                 "BIC": float(fit_result["BIC"]),
-                "AvgSlope_0_600": avg_slope_0_600,
-                "AvgSlope_0_300": avg_slope_0_300,
             }
         )
 
@@ -247,8 +224,7 @@ def print_metrics_summary(metrics_table: pd.DataFrame) -> None:
     for _, row in metrics_table.iterrows():
         print(
             f"{row['Model']}: Temp={row['Temp']:g} | R2={row['R2']:.4f} | "
-            f"RMSE={row['RMSE']:.4f} | AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f} | "
-            f"AvgSlope_0_600={row['AvgSlope_0_600']:.6f}"
+            f"RMSE={row['RMSE']:.4f} | AIC={row['AIC']:.2f} | BIC={row['BIC']:.2f}"
         )
 
 
@@ -268,19 +244,26 @@ def main() -> None:
     distribution_plot_path = save_three_temperature_scatter_distribution(subset, result_dir)
 
     modules = import_model_modules()
+    all_metrics_tables: list[pd.DataFrame] = []
     for selected_temp in selected_temps:
         fit_results, observed_df = fit_models_at_temperature(modules, subset, selected_temp)
         metrics_table = build_metrics_summary_table(fit_results, selected_temp)
+        all_metrics_tables.append(metrics_table)
         comparison_plot_path = save_model_comparison_plot(
             fit_results, observed_df, selected_temp, result_dir
         )
 
-        metrics_out_path = result_dir / f"model_metrics_at_temp{int(selected_temp)}.csv"
-        metrics_table.to_csv(metrics_out_path, index=False)
-
         print_metrics_summary(metrics_table)
-        print(f"Saved metrics table: {metrics_out_path}")
         print(f"Saved comparison plot: {comparison_plot_path}")
+
+    merged_metrics = (
+        pd.concat(all_metrics_tables, ignore_index=True)
+        .sort_values(by=["Temp", "Model"])
+        .reset_index(drop=True)
+    )
+    merged_out_path = result_dir / "model_metrics_all_temps.csv"
+    merged_metrics.to_csv(merged_out_path, index=False)
+    print(f"Saved merged metrics table: {merged_out_path}")
 
     print(f"Saved distribution plot: {distribution_plot_path}")
 
